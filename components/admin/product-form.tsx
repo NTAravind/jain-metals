@@ -333,7 +333,7 @@ export function ProductForm({
                       <Input
                         value={v.name}
                         onChange={(e) => updateVariant(idx, "name", e.target.value)}
-                        placeholder="e.g. Large / 12\""
+                        placeholder={'e.g. Large / 12"'}
                         className="h-10 rounded-xl border-black/5 dark:border-white/5 bg-white dark:bg-zinc-800"
                       />
                     </div>
