@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ─────────────────────────────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum DeliveryZone {
+  INSTATE
+  DOMESTIC
+  INTERNATIONAL
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+  FREE_DELIVERY
+}
+
+// ── Models ────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String    @id @default(cuid())
+  name      String?
+  email     String?   @unique
+  phone     String?   @unique
+  role      Role      @default(CUSTOMER)
+  orders    Order[]
+  addresses Address[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Address {
+  id        String  @id @default(cuid())
+  userId    String
+  fullName  String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  country   String  @default("India")
+  isDefault Boolean @default(false)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders    Order[]
+}
+
+model Product {
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
+  sku             String            @unique @default(cuid())
+  description     String            @db.Text
+  categoryId      String?
+  style           String?
+  price           Decimal           @db.Decimal(10, 2)
+  discountedPrice Decimal?          @db.Decimal(10, 2)
+  stock           Int               @default(0)
+  weightKg        Float?
+  heightCm        Float?
+  images          String[]
+  videoUrl        String?
+  isActive        Boolean           @default(true)
+  category        Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  discounts       DiscountProduct[]
+  orderItems      OrderItem[]
+  variants        SizeVariant[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model SizeVariant {
+  id              String      @id @default(cuid())
+  productId       String
+  name            String      // e.g. "12 inch", "2 kg", "Small"
+  price           Decimal     @db.Decimal(10, 2)
+  discountPercent Float       @default(0) // 0-100
+  discountedPrice Decimal?    @db.Decimal(10, 2)
+  stock           Int         @default(0)
+  sortOrder       Int         @default(0)
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Discount {
+  id            String            @id @default(cuid())
+  code          String?           @unique
+  type          DiscountType
+  value         Decimal           @db.Decimal(10, 2)
+  minOrderValue Decimal?          @db.Decimal(10, 2)
+  maxUses       Int?
+  usedCount     Int               @default(0)
+  freeDelivery  Boolean           @default(false)
+  isActive      Boolean           @default(true)
+  expiresAt     DateTime?
+  products      DiscountProduct[]
+  orders        Order[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model DiscountProduct {
+  discountId String
+  productId  String
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([discountId, productId])
+}
+
+model DeliveryConfig {
+  id             String       @id @default(cuid())
+  zone           DeliveryZone @unique
+  basePrice      Decimal      @db.Decimal(10, 2)
+  pricePerKg     Decimal      @db.Decimal(10, 2)
+  freeAboveValue Decimal?     @db.Decimal(10, 2)
+  updatedAt      DateTime     @updatedAt
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique @default(cuid())
+  userId          String
+  addressId       String
+  discountId      String?
+  subtotal        Decimal       @db.Decimal(10, 2)
+  deliveryFee     Decimal       @db.Decimal(10, 2)
+  discountAmount  Decimal       @default(0) @db.Decimal(10, 2)
+  total           Decimal       @db.Decimal(10, 2)
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  razorpayOrderId String?
+  razorpayPayId   String?
+  notes           String?       @db.Text
+  user            User          @relation(fields: [userId], references: [id])
+  address         Address       @relation(fields: [addressId], references: [id])
+  discount        Discount?     @relation(fields: [discountId], references: [id])
+  items           OrderItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OrderItem {
+  id             String       @id @default(cuid())
+  orderId        String
+  productId      String
+  sizeVariantId  String?
+  sizeName       String?
+  quantity       Int
+  unitPrice      Decimal      @db.Decimal(10, 2)
+  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id])
+  sizeVariant    SizeVariant? @relation(fields: [sizeVariantId], references: [id], onDelete: SetNull)
+}

@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -9,33 +7,81 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.pnpm-store
 
-# testing
+# Testing
 /coverage
 
-# next.js
+# Next.js
 /.next/
 /out/
+build
 
-# production
+# Production
 /build
 
-# misc
+# Misc
 .DS_Store
+Thumbs.db
 *.pem
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Environment files
+.env
+.env.local
+.env.*.local
 
-# vercel
+# Vercel
 .vercel
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Prisma
+/app/generated/prisma
+/prisma/migrations
+/prisma/*.db
+prisma/*.db-journal
+
+# Stitch design system (generated)
+/.stitch/cache
+/.stitch/outputs
+/.stitch/designs/*.html
+/.stitch/*.json
+/.stitch/*.md
+
+# Prompts / Agent files
+/prompts
+/.stitch
+
+# IDE
+.idea
+*.swp
+*.swo
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Logs
+logs
+*.log
+
+# Cache
+.cache
+.turbo
+
+# Temp files
+*.bak
+*.tmp
+*.temp
+
+# Media uploads (if any)
+/public/uploads

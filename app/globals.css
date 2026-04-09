@@ -1,26 +1,247 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
+/* ─── Brand Tokens ────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-navy: #0D1235;
+  --brand-surface: #111A40;
+  --brand-brass: #A07830;
+  --brand-gold: #C9A84C;
+  --brand-gold-soft: #E8C97A;
+  --brand-cream: #F5E6C0;
+  --brand-slate: #8A9BB0;
+  --brand-white: #FFFFFF;
+
+  /* ─── Shadcn / Tailwind Theme Mapping — Light (white default) ──────────── */
+  /* All values are hardcoded hex — no var() chains here.                     */
+  /* CSS variable chains inside @layer base cause black fallbacks in v4.      */
+  --background: #FFFFFF;
+  --foreground: #0D1235;
+
+  --card: #FFFFFF;
+  --card-foreground: #0D1235;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #0D1235;
+
+  --primary: #C9A84C;
+  --primary-foreground: #0D1235;
+
+  --secondary: #F5E6C0;
+  --secondary-foreground: #0D1235;
+
+  --muted: #F7F3EC;
+  --muted-foreground: #8A9BB0;
+
+  --accent: #F5E6C0;
+  --accent-foreground: #0D1235;
+
+  --destructive: #e53e3e;
+  --destructive-foreground: #FFFFFF;
+
+  /* Use 8-digit hex for alpha — avoids rgba() parsing issues in Tailwind v4 */
+  --border: #A0783033;
+  --input: #A0783026;
+  --ring: #C9A84C;
+
+  --radius: 0.5rem;
+
+  /* ─── Fonts ─────────────────────────────────────────────────────────────── */
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Geist Mono', monospace;
 }
 
-@theme inline {
+/* ─── Dark mode — navy base (admin panel + dark sections) ────────────────── */
+.dark {
+  --background: #0D1235;
+  --foreground: #F5E6C0;
+
+  --card: #111A40;
+  --card-foreground: #F5E6C0;
+
+  --popover: #111A40;
+  --popover-foreground: #F5E6C0;
+
+  --primary: #C9A84C;
+  --primary-foreground: #0D1235;
+
+  --secondary: #111A40;
+  --secondary-foreground: #F5E6C0;
+
+  --muted: #111A40;
+  --muted-foreground: #8A9BB0;
+
+  --accent: #111A40;
+  --accent-foreground: #E8C97A;
+
+  --destructive: #7f1d1d;
+  --destructive-foreground: #F5E6C0;
+
+  --border: #A0783040;
+  --input: #A0783033;
+  --ring: #C9A84C;
+}
+
+/* ─── Tailwind @theme registration ───────────────────────────────────────── */
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand tokens as named Tailwind utilities                  */
+  /* Use as: bg-brand-navy, text-brand-gold, border-brand-brass etc. */
+  --color-brand-navy: #0D1235;
+  --color-brand-surface: #111A40;
+  --color-brand-gold: #C9A84C;
+  --color-brand-gold-soft: #E8C97A;
+  --color-brand-brass: #A07830;
+  --color-brand-cream: #F5E6C0;
+  --color-brand-slate: #8A9BB0;
+  --color-brand-white: #FFFFFF;
+  /* FIXED — point to the actual :root values */
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Geist Mono', monospace;
+
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── Base styles ─────────────────────────────────────────────────────────── */
+@layer base {
+  /*
+   * IMPORTANT: Do NOT use `* { @apply border-border }` here.
+   * In Tailwind v4, applying border-border globally causes every element
+   * with a default browser border (buttons, inputs, hr, fieldset etc.)
+   * to render black because the CSS variable resolves before the cascade
+   * is fully established on some elements.
+   * Instead, border-color is only applied where explicitly needed.
+   */
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Texture utilities ───────────────────────────────────────────────────── */
+@utility white-pattern {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("/images/white.webp");
+    background-repeat: repeat;
+    background-size: 600px;
+    opacity: 0.14;
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+@utility blue-texture {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("/images/blue.webp");
+    background-repeat: repeat;
+    background-size: 600px;
+    opacity: 0.18;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+@utility floral-texture {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 2c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6zm0 18c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 2c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6zm0 18c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 2c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6zM0 30c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8-8 3.582-8-8-8zm2 0c0-3.314 2.686-6 6-6s6 2.686 6 6-2.686 6-6 6-6-2.686-6-6zm18 0c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8-8-3.582-8-8s3.582-8 8-8zm2 0c0-3.314 2.686-6 6-6s6 2.686 6 6-2.686 6-6 6-6-2.686-6-6zm18 0c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8 8-3.582 8-8 3.582-8-8-8zm2 0c0-3.314 2.686-6 6-6s6 2.686 6 6-2.686 6-6 6-6-2.686-6-6z' fill='%23C9A84C' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+/* ─── Card variants ───────────────────────────────────────────────────────── */
+.card-premium-light {
+  background: white;
+  border: 1px solid rgba(160, 120, 48, 0.15);
+  box-shadow: 0 4px 24px -4px rgba(13, 18, 53, 0.06), 0 1px 6px rgba(13, 18, 53, 0.04);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium-light:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 168, 76, 0.4);
+  box-shadow: 0 16px 40px -8px rgba(13, 18, 53, 0.1), 0 0 16px rgba(201, 168, 76, 0.12);
+}
+
+.card-premium-dark {
+  background: #111A40;
+  border: 1px solid rgba(160, 120, 48, 0.25);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium-dark:hover {
+  border-color: rgba(201, 168, 76, 0.55);
+  box-shadow: 0 0 24px rgba(201, 168, 76, 0.12);
+}
+
+/* ─── Section helpers ─────────────────────────────────────────────────────── */
+.section-white {
+  @apply bg-white text-brand-navy white-pattern;
+}
+
+.section-dark {
+  @apply bg-brand-navy text-brand-cream;
 }
