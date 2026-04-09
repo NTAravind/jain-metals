@@ -93,7 +93,7 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 6 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-[calc(100%-1px)] left-0 w-[480px] bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-2xl grid grid-cols-2 p-8 z-[60] rounded-b-2xl"
+                      className="absolute top-[calc(100%-1px)] left-0 w-[480px] bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-2xl grid grid-cols-2 p-8 z-[60] "
                     >
                       <div className="space-y-4 pr-8 border-r border-black/5 dark:border-white/5">
                         <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/30 dark:text-white/30">Collections</p>

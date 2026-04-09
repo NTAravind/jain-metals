@@ -94,7 +94,7 @@ export function SignIn() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-brand-navy blue-texture animate-in fade-in duration-700">
+        <div className="min-h-screen flex items-center justify-center px-6 pt-32 pb-12 bg-brand-navy blue-texture animate-in fade-in duration-700">
             <div className="w-full max-w-[420px]">
 
                 {/* Header */}

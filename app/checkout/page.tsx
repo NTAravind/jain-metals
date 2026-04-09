@@ -411,7 +411,7 @@ export default function CheckoutPage() {
                      </div>
                      <div>
                         <p className="font-serif text-2xl text-brand-navy leading-none mb-3">Pickup</p>
-                        <p className="text-sm text-brand-navy/70 leading-relaxed">Collect your order directly from our shop in Jaipur.</p>
+                        <p className="text-sm text-brand-navy/70 leading-relaxed">Collect your order directly from our shop in [City].</p>
                      </div>
                   </button>
                </div>
