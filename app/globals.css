@@ -3,6 +3,10 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+html {
+  color-scheme: light;
+}
+
 /* ─── Brand Tokens ────────────────────────────────────────────────────────── */
 :root {
   --brand-navy: #0D1235;
