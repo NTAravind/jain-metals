@@ -90,10 +90,10 @@ export function ProductDetailClient({ product }: { product: any }) {
   }
 
   return (
-    <div className="storefront bg-white dark:bg-zinc-950 min-h-screen">
+    <div className="storefront bg-white min-h-screen">
       {/* 1. VISUAL NARRATIVE & PRIMARY INFO: Section White */}
-      <section className="section-white relative border-b border-black/5 dark:border-white/5 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-full bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.03)_0%,transparent_70%)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)]"></div>
+      <section className="section-white relative border-b border-black/5 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-full bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.03)_0%,transparent_70%)]"></div>
         
         <div className="max-w-[1440px] mx-auto px-8 md:px-12 py-32 flex flex-col lg:flex-row gap-24 xl:gap-32 relative z-10">
           

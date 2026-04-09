@@ -87,21 +87,21 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
 
   return (
     <div className="space-y-10">
-      <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end p-6 bg-black/[0.02] dark:bg-white/[0.02] rounded-2xl border border-black/5 dark:border-white/5">
+      <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end p-6 bg-black/[0.02] rounded-2xl border border-black/5">
         <div className="md:col-span-3 space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40 ml-1">New Collection Designation</label>
+          <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 ml-1">New Collection Designation</label>
           <Input 
             value={name} 
             onChange={(e) => setName(e.target.value)} 
             placeholder="e.g. Ritual Statues, Brass Ornaments..." 
             disabled={isPending}
-            className="h-12 rounded-xl border-black/10 dark:border-white/10 bg-white dark:bg-zinc-950 focus:ring-black dark:focus:ring-white transition-all text-base"
+            className="h-12 rounded-xl border-black/10 bg-white focus:ring-black transition-all text-base"
           />
         </div>
         <Button 
           type="submit" 
           disabled={isPending || !name.trim()}
-          className="h-12 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-all"
+          className="h-12 rounded-xl bg-black text-white font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-all"
         >
           {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
           Register
@@ -111,28 +111,28 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
       <div className="overflow-hidden">
         {categories.length === 0 ? (
           <div className="py-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-black/[0.03] dark:bg-white/[0.03] rounded-full flex items-center justify-center mx-auto">
-              <Plus className="w-6 h-6 text-black/20 dark:text-white/20" />
+            <div className="w-16 h-16 bg-black/[0.03] rounded-full flex items-center justify-center mx-auto">
+              <Plus className="w-6 h-6 text-black/20" />
             </div>
-            <p className="text-black/40 dark:text-white/40 font-medium italic">No collections registered in the archive.</p>
+            <p className="text-black/40 font-medium italic">No collections registered in the archive.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/30 dark:text-white/30 ml-1">Active Collections</h3>
-            <div className="rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden bg-white dark:bg-zinc-950">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/30 ml-1">Active Collections</h3>
+            <div className="rounded-2xl border border-black/5 overflow-hidden bg-white">
               <table className="w-full text-sm text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
-                    <th className="px-8 py-5 font-bold uppercase tracking-widest text-[10px] text-black/40 dark:text-white/40">Designation</th>
-                    <th className="px-8 py-5 font-bold uppercase tracking-widest text-[10px] text-black/40 dark:text-white/40">Global Adjustment</th>
-                    <th className="px-8 py-5 text-right font-bold uppercase tracking-widest text-[10px] text-black/40 dark:text-white/40">Management</th>
+                  <tr className="border-b border-black/5 bg-black/[0.01]">
+                    <th className="px-8 py-5 font-bold uppercase tracking-widest text-[10px] text-black/40">Designation</th>
+                    <th className="px-8 py-5 font-bold uppercase tracking-widest text-[10px] text-black/40">Global Adjustment</th>
+                    <th className="px-8 py-5 text-right font-bold uppercase tracking-widest text-[10px] text-black/40">Management</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-black/5 dark:divide-white/5">
+                <tbody className="divide-y divide-black/5">
                   {categories.map((cat) => (
-                    <tr key={cat.id} className="hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors group">
+                    <tr key={cat.id} className="hover:bg-black/[0.01] transition-colors group">
                       <td className="px-8 py-6">
-                        <span className="font-bold text-black dark:text-white text-base tracking-tight">{cat.name}</span>
+                        <span className="font-bold text-black text-base tracking-tight">{cat.name}</span>
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-3">
@@ -143,18 +143,18 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
                               min="0"
                               max="100"
                               placeholder="0"
-                              className="h-10 w-24 pr-8 rounded-lg border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] font-mono text-sm"
+                              className="h-10 w-24 pr-8 rounded-lg border-black/10 bg-black/[0.02] font-mono text-sm"
                               value={discountValues[cat.id] ?? ""}
                               onChange={(e) =>
                                 setDiscountValues((prev) => ({ ...prev, [cat.id]: e.target.value }))
                               }
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-black/30 dark:text-white/30">%</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-black/30">%</span>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-10 px-4 rounded-lg border-black/10 dark:border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all"
+                            className="h-10 px-4 rounded-lg border-black/10 text-[10px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all"
                             disabled={applyingDiscount === cat.id || !discountValues[cat.id]}
                             onClick={() => handleApplyDiscount(cat.id)}
                           >
@@ -170,7 +170,7 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="w-10 h-10 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-black/20 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                          className="w-10 h-10 rounded-xl hover:bg-red-50 text-black/20 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
                           onClick={() => setDeleteId(cat.id)}
                         >
                           <Trash2 className="w-4 h-4" />

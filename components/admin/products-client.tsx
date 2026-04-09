@@ -59,8 +59,8 @@ export function ProductsClient({ products }: { products: Product[] }) {
         <Badge 
           variant={row.isActive ? "default" : "secondary"} 
           className={row.isActive 
-            ? "bg-black dark:bg-white text-white dark:text-black hover:opacity-90 rounded-full px-3 py-0.5" 
-            : "bg-black/5 dark:bg-white/5 text-black/50 dark:text-white/50 hover:bg-black/10 dark:hover:bg-white/10 rounded-full px-3 py-0.5"}
+            ? "bg-black text-white hover:opacity-90 rounded-full px-3 py-0.5" 
+            : "bg-black/5 text-black/50 hover:bg-black/10 rounded-full px-3 py-0.5"}
         >
           {row.isActive ? "Active" : "Inactive"}
         </Badge>
@@ -106,17 +106,17 @@ export function ProductsClient({ products }: { products: Product[] }) {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Products</h1>
-          <p className="text-black/50 dark:text-white/50 mt-1 font-medium">Manage your product inventory and variants</p>
+          <h1 className="text-3xl font-bold text-black tracking-tight">Products</h1>
+          <p className="text-black/50 mt-1 font-medium">Manage your product inventory and variants</p>
         </div>
-        <Button asChild className="gap-2 bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity rounded-xl h-12 px-6 shadow-lg">
+        <Button asChild className="gap-2 bg-black text-white hover:opacity-90 transition-opacity rounded-xl h-12 px-6 shadow-lg">
           <Link href="/admin/products/new">
             <Plus className="w-5 h-5" /> Add Product
           </Link>
         </Button>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-black/10 dark:border-white/10 overflow-hidden shadow-xl shadow-black/[0.02] dark:shadow-white/[0.02]">
+      <div className="bg-white rounded-2xl border border-black/10 overflow-hidden shadow-xl shadow-black/[0.02]">
         <DataTable
           columns={columns}
           data={products}
@@ -130,16 +130,16 @@ export function ProductsClient({ products }: { products: Product[] }) {
         open={!!deleteId}
         onOpenChange={(v) => !v && setDeleteId(null)}
       >
-        <AlertDialogContent className="bg-white dark:bg-zinc-900 border-black/10 dark:border-white/10 rounded-2xl">
+        <AlertDialogContent className="bg-white border-black/10 rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold text-black dark:text-white">Delete this product?</AlertDialogTitle>
-            <AlertDialogDescription className="text-black/60 dark:text-white/60">
+            <AlertDialogTitle className="text-xl font-bold text-black">Delete this product?</AlertDialogTitle>
+            <AlertDialogDescription className="text-black/60">
               This will permanently remove the product and all its variants.
               This action cannot be undone and will affect current orders.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-xl border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl border-black/10 hover:bg-black/5">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">Delete Product</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

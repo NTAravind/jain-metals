@@ -52,8 +52,8 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
           fixed top-0 left-0 right-0 z-50 
           transition-all duration-500 ease-in-out
           ${isScrolled
-            ? "bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-b border-black/10 dark:border-white/10 h-20"
-            : "bg-white dark:bg-zinc-950 h-24 border-b border-black/5 dark:border-white/5"}
+            ? "bg-white/95 backdrop-blur-md border-b border-black/10 h-20"
+            : "bg-white h-24 border-b border-black/5"}
         `}
       >
         <div className="max-w-[1440px] mx-auto h-full px-8 md:px-12 flex items-center justify-between">
@@ -80,7 +80,7 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
               >
                 <Link
                   href="/products"
-                  className="text-[10px] font-bold tracking-[0.25em] uppercase text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-all flex items-center gap-2"
+                  className="text-[10px] font-bold tracking-[0.25em] uppercase text-black/60 hover:text-black transition-all flex items-center gap-2"
                 >
                   Shop <ChevronDown className={`w-3 h-3 transition-transform duration-500 ${collectionsOpen ? "rotate-180" : ""}`} />
                 </Link>
@@ -93,16 +93,16 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 6 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-[calc(100%-1px)] left-0 w-[480px] bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-2xl grid grid-cols-2 p-8 z-[60] "
+                      className="absolute top-[calc(100%-1px)] left-0 w-[480px] bg-white border border-black/10 shadow-2xl grid grid-cols-2 p-8 z-[60] "
                     >
-                      <div className="space-y-4 pr-8 border-r border-black/5 dark:border-white/5">
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/30 dark:text-white/30">Collections</p>
+                      <div className="space-y-4 pr-8 border-r border-black/5">
+                        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/30">Collections</p>
                         <div className="space-y-1">
                           {categories.slice(0, 5).map((cat) => (
                             <Link
                               key={cat.id}
                               href={`/products?category=${cat.slug}`}
-                              className="block py-2 text-[11px] font-bold tracking-widest uppercase text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:translate-x-1 transition-all"
+                              className="block py-2 text-[11px] font-bold tracking-widest uppercase text-black/60 hover:text-black hover:translate-x-1 transition-all"
                               onClick={() => setCollectionsOpen(false)}
                             >
                               {cat.name}
@@ -124,7 +124,7 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
                             <p className="text-sm font-serif text-white italic">Our Latest Products</p>
                           </div>
                         </div>
-                        <Link href="/products" className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white flex items-center gap-2" onClick={() => setCollectionsOpen(false)}>
+                        <Link href="/products" className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/40 hover:text-black flex items-center gap-2" onClick={() => setCollectionsOpen(false)}>
                           View All Products <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>
@@ -135,7 +135,7 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
 
               <Link
                 href="/products"
-                className="text-[10px] font-bold tracking-[0.25em] uppercase text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-all"
+                className="text-[10px] font-bold tracking-[0.25em] uppercase text-black/60 hover:text-black transition-all"
               >
                 Our Products
               </Link>
@@ -143,7 +143,7 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
               {session && (
                 <Link
                   href="/orders"
-                  className="text-[10px] font-bold tracking-[0.25em] uppercase text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-all"
+                  className="text-[10px] font-bold tracking-[0.25em] uppercase text-black/60 hover:text-black transition-all"
                 >
                   My Orders
                 </Link>
@@ -156,10 +156,10 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
               <SearchBar />
             </div>
             <CartSidebar>
-              <Button variant="ghost" className="relative h-12 w-12 p-0 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl group border border-black/10 dark:border-white/10 transition-all">
-                <ShoppingCart className="w-5 h-5 text-black/60 dark:text-white/60 group-hover:text-black dark:group-hover:text-white transition-colors" />
+              <Button variant="ghost" className="relative h-12 w-12 p-0 hover:bg-black/5 rounded-xl group border border-black/10 transition-all">
+                <ShoppingCart className="w-5 h-5 text-black/60 group-hover:text-black transition-colors" />
                 {count > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-black dark:bg-white text-white dark:text-black text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white dark:border-zinc-950">
+                  <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white">
                     {count}
                   </span>
                 )}
@@ -170,28 +170,28 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
               {session ? (
                 <Button
                   variant="ghost"
-                  className="h-12 px-5 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl group transition-all"
+                  className="h-12 px-5 hover:bg-black/5 rounded-xl group transition-all"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
-                  <User className="w-4 h-4 text-black/60 dark:text-white/60 group-hover:text-black dark:group-hover:text-white transition-colors" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] ml-2 text-black/60 dark:text-white/60 group-hover:text-black dark:group-hover:text-white">Admin Exit</span>
+                  <User className="w-4 h-4 text-black/60 group-hover:text-black transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] ml-2 text-black/60 group-hover:text-black">Admin Exit</span>
                 </Button>
               ) : (
-                <Button variant="ghost" asChild className="h-12 px-5 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl group border border-black/10 dark:border-white/10 transition-all">
+                <Button variant="ghost" asChild className="h-12 px-5 hover:bg-black/5 rounded-xl group border border-black/10 transition-all">
                   <Link href="/login" className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-black/60 dark:text-white/60 group-hover:text-black dark:group-hover:text-white transition-colors" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/60 dark:text-white/60 group-hover:text-black dark:group-hover:text-white">Patron Entry</span>
+                    <User className="w-4 h-4 text-black/60 group-hover:text-black transition-colors" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/60 group-hover:text-black">Patron Entry</span>
                   </Link>
                 </Button>
               )}
             </div>
 
             <button
-              className="lg:hidden p-3 rounded-xl border border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+              className="lg:hidden p-3 rounded-xl border border-black/5 hover:bg-black/5 transition-all"
               onClick={() => setOpen(!open)}
               aria-label="Toggle menu"
             >
-              {open ? <X className="w-6 h-6 text-black dark:text-white" /> : <Menu className="w-6 h-6 text-black dark:text-white" />}
+              {open ? <X className="w-6 h-6 text-black" /> : <Menu className="w-6 h-6 text-black" />}
             </button>
           </div>
         </div>

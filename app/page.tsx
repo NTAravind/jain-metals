@@ -13,31 +13,31 @@ export default async function HomePage() {
   return (
     <StorefrontLayout>
       {/* 1. HERO */}
-      <section className="section-white relative min-h-[95vh] flex items-center overflow-hidden border-b border-brand-navy/5 dark:border-white/5">
+      <section className="section-white relative min-h-[95vh] flex items-center overflow-hidden border-b border-brand-navy/5">
         <div className="max-w-[1440px] mx-auto px-8 md:px-12 w-full grid lg:grid-cols-2 gap-20 items-center relative z-10 pt-32">
           <div className="space-y-10 animate-in fade-in slide-in-from-left-8 duration-1000">
             <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-[0.3em] text-brand-navy dark:text-white/40 flex items-center gap-3">
-                <span className="w-8 h-[1.5px] bg-brand-navy dark:bg-white"></span>
+              <span className="text-xs font-bold uppercase tracking-[0.3em] text-brand-navy flex items-center gap-3">
+                <span className="w-8 h-[1.5px] bg-brand-navy"></span>
                 Trusted Since 1964
               </span>
-              <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-brand-navy dark:text-white leading-[0.95] drop-shadow-sm">
+              <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-brand-navy leading-[0.95] drop-shadow-sm">
                 Handcrafted <br />
                 <span className="italic opacity-60">Metals & Art</span>
               </h1>
             </div>
 
-            <p className="text-lg md:text-xl text-brand-navy/60 dark:text-white/60 max-w-xl font-sans leading-relaxed border-l-2 border-brand-navy/10 dark:border-white/10 pl-8">
+            <p className="text-lg md:text-xl text-brand-navy/60 max-w-xl font-sans leading-relaxed border-l-2 border-brand-navy/10 pl-8">
               Exquisite brass idols, timeless home decor, and heritage copper utensils — orchestrated with precision and delivered with integrity.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 pt-6">
-              <Button asChild size="lg" className="bg-brand-navy dark:bg-white text-white dark:text-brand-navy hover:bg-brand-surface dark:hover:bg-zinc-200 transition-all duration-500 text-sm px-12 h-14 rounded-none uppercase tracking-[0.2em] font-bold shadow-2xl shadow-brand-navy/20 group border-0">
+              <Button asChild size="lg" className="bg-brand-navy text-white hover:bg-brand-surface transition-all duration-500 text-sm px-12 h-14 rounded-none uppercase tracking-[0.2em] font-bold shadow-2xl shadow-brand-navy/20 group border-0">
                 <Link href="/products" className="flex items-center gap-3">
                   Shop Now <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="ghost" className="text-brand-navy dark:text-white border border-brand-navy/10 dark:border-white/10 hover:bg-brand-navy/5 dark:hover:bg-white/5 transition-all text-sm px-12 h-14 rounded-none uppercase tracking-[0.2em] font-bold">
+              <Button asChild size="lg" variant="ghost" className="text-brand-navy border border-brand-navy/10 hover:bg-brand-navy/5 transition-all text-sm px-12 h-14 rounded-none uppercase tracking-[0.2em] font-bold">
                 <Link href="/products">
                   Our Story
                 </Link>
@@ -46,7 +46,7 @@ export default async function HomePage() {
           </div>
 
           <div className="relative hidden lg:block animate-in fade-in zoom-in-95 duration-1000 delay-300">
-            <div className="aspect-[4/5] bg-zinc-100 dark:bg-zinc-900 relative overflow-hidden rounded-none border border-brand-navy/5 dark:border-white/5">
+            <div className="aspect-[4/5] bg-zinc-100 relative overflow-hidden rounded-none border border-brand-navy/5">
               <img
                 src="/images/hero.webp"
                 className="w-full h-full object-cover opacity-90"
@@ -58,13 +58,13 @@ export default async function HomePage() {
                 <p className="text-3xl font-serif text-white italic tracking-tighter">Premium Collection</p>
               </div>
             </div>
-            <div className="absolute -inset-4 border border-brand-navy/10 dark:border-white/10 -z-10 translate-x-4 translate-y-4"></div>
+            <div className="absolute -inset-4 border border-brand-navy/10 -z-10 translate-x-4 translate-y-4"></div>
           </div>
         </div>
 
         <div className="absolute bottom-12 right-12 hidden md:flex items-center gap-4">
-          <span className="text-[9px] uppercase tracking-[0.5em] text-brand-navy/30 dark:text-white/30 font-bold rotate-90 origin-right whitespace-nowrap">Quality First</span>
-          <div className="w-[1.5px] h-24 bg-brand-navy/10 dark:bg-white/10"></div>
+          <span className="text-[9px] uppercase tracking-[0.5em] text-brand-navy/30 font-bold rotate-90 origin-right whitespace-nowrap">Quality First</span>
+          <div className="w-[1.5px] h-24 bg-brand-navy/10"></div>
         </div>
       </section>
 
@@ -91,22 +91,22 @@ export default async function HomePage() {
       </section>
 
       {/* 3. COLLECTION */}
-      <section className="section-white py-32 bg-white dark:bg-zinc-950">
+      <section className="section-white py-32 bg-white">
         <div className="max-w-[1440px] mx-auto px-8 md:px-12">
           <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
             <div className="space-y-6">
               <div className="flex items-center gap-4">
-                <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-brand-navy/40 dark:text-white/40">Inventory</span>
-                <div className="w-12 h-[1px] bg-brand-navy/10 dark:bg-white/10"></div>
+                <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-brand-navy/40">Inventory</span>
+                <div className="w-12 h-[1px] bg-brand-navy/10"></div>
               </div>
-              <h2 className="text-5xl md:text-6xl font-serif text-brand-navy dark:text-white tracking-tighter">Shop Our Collection</h2>
-              <p className="text-brand-navy/50 dark:text-white/50 font-sans max-w-md leading-relaxed text-lg">
+              <h2 className="text-5xl md:text-6xl font-serif text-brand-navy tracking-tighter">Shop Our Collection</h2>
+              <p className="text-brand-navy/50 font-sans max-w-md leading-relaxed text-lg">
                 Precision-crafted idols and heritage utensils, designed for the discerning collector.
               </p>
             </div>
             <Link
               href="/products"
-              className="group flex items-center gap-4 text-[10px] uppercase tracking-[0.3em] font-bold text-brand-navy dark:text-white hover:opacity-60 transition-all pb-4 border-b border-brand-navy/10 dark:border-white/10"
+              className="group flex items-center gap-4 text-[10px] uppercase tracking-[0.3em] font-bold text-brand-navy hover:opacity-60 transition-all pb-4 border-b border-brand-navy/10"
             >
               Examine All Records <ArrowRight className="w-4 h-4 group-hover:translate-x-3 transition-transform duration-500" />
             </Link>
@@ -146,18 +146,18 @@ export default async function HomePage() {
       </section>
 
       {/* 5. WHATSAPP CONTACT */}
-      <section className="section-white py-32 relative overflow-hidden bg-white dark:bg-zinc-950">
+      <section className="section-white py-32 relative overflow-hidden bg-white">
         <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid lg:grid-cols-2 gap-20 items-center">
           <div className="space-y-10">
             <div className="space-y-4">
-              <h3 className="text-4xl md:text-5xl font-serif text-brand-navy dark:text-white tracking-tighter leading-tight">Professional Consultation<br />Direct Channel</h3>
-              <p className="text-brand-navy/50 dark:text-white/50 leading-relaxed font-sans text-lg border-l-4 border-brand-navy dark:border-white pl-10 max-w-lg">
+              <h3 className="text-4xl md:text-5xl font-serif text-brand-navy tracking-tighter leading-tight">Professional Consultation<br />Direct Channel</h3>
+              <p className="text-brand-navy/50 leading-relaxed font-sans text-lg border-l-4 border-brand-navy pl-10 max-w-lg">
                 Inquire about custom orders, bulk acquisitions, or product specifics.
                 Our team is available for real-time correspondence via encrypted chat.
               </p>
             </div>
             <div className="pt-6">
-              <Button asChild size="lg" className="bg-brand-navy dark:bg-white text-white dark:text-brand-navy hover:bg-brand-surface dark:hover:bg-zinc-200 transition-all duration-500 text-[10px] px-14 h-18 rounded-none uppercase tracking-[0.3em] font-bold shadow-2xl shadow-brand-navy/10 group">
+              <Button asChild size="lg" className="bg-brand-navy text-white hover:bg-brand-surface transition-all duration-500 text-[10px] px-14 h-18 rounded-none uppercase tracking-[0.3em] font-bold shadow-2xl shadow-brand-navy/10 group">
 
                 <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919000000000"}`}
                   target="_blank"
@@ -169,7 +169,7 @@ export default async function HomePage() {
               </Button>
             </div>
           </div>
-          <div className="relative group overflow-hidden border border-brand-navy/5 dark:border-white/5">
+          <div className="relative group overflow-hidden border border-brand-navy/5">
             <img
               src="/images/website 003.webp"
               className="w-full h-full object-cover aspect-video object-center grayscale hover:grayscale-0 transition-all duration-1000"

@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
+
 
 html {
   color-scheme: light;
@@ -59,35 +59,7 @@ html {
 }
 
 /* ─── Dark mode — navy base (admin panel + dark sections) ────────────────── */
-.dark {
-  --background: #0D1235;
-  --foreground: #F5E6C0;
 
-  --card: #111A40;
-  --card-foreground: #F5E6C0;
-
-  --popover: #111A40;
-  --popover-foreground: #F5E6C0;
-
-  --primary: #C9A84C;
-  --primary-foreground: #0D1235;
-
-  --secondary: #111A40;
-  --secondary-foreground: #F5E6C0;
-
-  --muted: #111A40;
-  --muted-foreground: #8A9BB0;
-
-  --accent: #111A40;
-  --accent-foreground: #E8C97A;
-
-  --destructive: #7f1d1d;
-  --destructive-foreground: #F5E6C0;
-
-  --border: #A0783040;
-  --input: #A0783033;
-  --ring: #C9A84C;
-}
 
 /* ─── Tailwind @theme registration ───────────────────────────────────────── */
 @theme {
@@ -230,16 +202,7 @@ html {
   box-shadow: 0 16px 40px -8px rgba(13, 18, 53, 0.1), 0 0 16px rgba(201, 168, 76, 0.12);
 }
 
-.card-premium-dark {
-  background: #111A40;
-  border: 1px solid rgba(160, 120, 48, 0.25);
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-.card-premium-dark:hover {
-  border-color: rgba(201, 168, 76, 0.55);
-  box-shadow: 0 0 24px rgba(201, 168, 76, 0.12);
-}
 
 /* ─── Section helpers ─────────────────────────────────────────────────────── */
 .section-white {

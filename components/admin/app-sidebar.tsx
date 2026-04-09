@@ -11,7 +11,6 @@ import {
   SidebarHeader,
   SidebarFooter
 } from "@/components/ui/sidebar"
-import { ThemeToggle } from "@/components/admin/theme-toggle"
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -35,21 +34,21 @@ const navItems = [
 export function AppSidebar() {
   const pathname = usePathname()
   return (
-    <Sidebar className="border-r border-black/5 dark:border-white/5">
-      <SidebarHeader className="px-6 py-6 border-b border-black/5 dark:border-white/5 bg-white dark:bg-zinc-950">
+    <Sidebar className="border-r border-black/5">
+      <SidebarHeader className="px-6 py-6 border-b border-black/5 bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black dark:bg-white rounded-xl flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-default">
-            <span className="text-white dark:text-black text-sm font-bold tracking-tighter">JM</span>
+          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-default">
+            <span className="text-white text-sm font-bold tracking-tighter">JM</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-lg text-black dark:text-white tracking-tight leading-none mb-1">Jain Metals</span>
-            <span className="text-[10px] uppercase tracking-widest text-black/40 dark:text-white/40 font-bold">Admin Foundry</span>
+            <span className="font-bold text-lg text-black tracking-tight leading-none mb-1">Jain Metals</span>
+            <span className="text-[10px] uppercase tracking-widest text-black/40 font-bold">Admin Foundry</span>
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent className="bg-white dark:bg-zinc-950 px-2 pt-4">
+      <SidebarContent className="bg-white px-2 pt-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-black/30 dark:text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 px-4">Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-black/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 px-4">Menu</SidebarGroupLabel>
           <SidebarMenu className="gap-1">
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
@@ -59,7 +58,7 @@ export function AppSidebar() {
                     pathname === item.href ||
                     pathname.startsWith(item.href + "/")
                   }
-                  className="h-11 px-4 rounded-lg transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5 data-[active=true]:bg-black dark:data-[active=true]:bg-white data-[active=true]:text-white dark:data-[active=true]:text-black data-[active=true]:shadow-md group"
+                  className="h-11 px-4 rounded-lg transition-all duration-200 hover:bg-black/5 data-[active=true]:bg-black data-[active=true]:text-white data-[active=true]:shadow-md group"
                 >
                   <Link href={item.href} className="flex items-center gap-3">
                     <item.icon className="w-4 h-4 transition-transform group-active:scale-90" />
@@ -71,8 +70,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t border-black/5 dark:border-white/5 bg-white dark:bg-zinc-950">
-        <ThemeToggle />
+      <SidebarFooter className="p-4 border-t border-black/5 bg-white">
       </SidebarFooter>
     </Sidebar>
   )

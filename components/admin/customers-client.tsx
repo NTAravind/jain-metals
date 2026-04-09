@@ -46,17 +46,17 @@ export function CustomersClient({ customers }: { customers: Customer[] }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-black dark:text-white">Active Patrons</h2>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40">Verified directory of store interactions</p>
+          <h2 className="text-xl font-bold text-black">Active Patrons</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/40">Verified directory of store interactions</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
         <DataTable
           columns={columns.map(col => ({
             ...col,
             header: (
-              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40 dark:text-white/40">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">
                 {col.header as string}
               </span>
             )

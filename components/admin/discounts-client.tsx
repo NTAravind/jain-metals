@@ -73,18 +73,18 @@ function DiscountForm({
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40 ml-1">Key Designation (Code)</Label>
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 ml-1">Key Designation (Code)</Label>
           <Input
             name="code"
             defaultValue={discount?.code ?? ""}
             placeholder="e.g. WELCOME20"
-            className="h-12 rounded-xl border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] uppercase font-mono text-base focus:ring-black dark:focus:ring-white transition-all"
+            className="h-12 rounded-xl border-black/10 bg-black/[0.02] uppercase font-mono text-base focus:ring-black transition-all"
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40 ml-1">Adjustment Type</Label>
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 ml-1">Adjustment Type</Label>
           <Select value={type} onValueChange={setType}>
-            <SelectTrigger className="h-12 rounded-xl border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] focus:ring-black dark:focus:ring-white transition-all">
+            <SelectTrigger className="h-12 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-black/10">
@@ -95,7 +95,7 @@ function DiscountForm({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40 ml-1">Reduction Magnitude</Label>
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 ml-1">Reduction Magnitude</Label>
           <div className="relative">
             <Input
               name="value"
@@ -104,41 +104,41 @@ function DiscountForm({
               defaultValue={discount ? Number(discount.value) : ""}
               required
               placeholder="0.00"
-              className="h-12 rounded-xl border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] focus:ring-black dark:focus:ring-white transition-all text-base pr-12"
+              className="h-12 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-base pr-12"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-black/30 dark:text-white/30">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-black/30">
               {type === "PERCENTAGE" ? "%" : "₹"}
             </span>
           </div>
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40 ml-1">Minimum Acquisition (₹)</Label>
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 ml-1">Minimum Acquisition (₹)</Label>
           <Input
             name="minOrderValue"
             type="number"
             placeholder="0"
-            className="h-12 rounded-xl border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] focus:ring-black dark:focus:ring-white transition-all text-base"
+            className="h-12 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-base"
             defaultValue={
               discount?.minOrderValue ? Number(discount.minOrderValue) : ""
             }
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40 ml-1">Usage Limit</Label>
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 ml-1">Usage Limit</Label>
           <Input
             name="maxUses"
             type="number"
             placeholder="No limit"
-            className="h-12 rounded-xl border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] focus:ring-black dark:focus:ring-white transition-all text-base"
+            className="h-12 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-base"
             defaultValue={discount?.maxUses ?? ""}
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40 ml-1">Expiration Temporal Point</Label>
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 ml-1">Expiration Temporal Point</Label>
           <Input
             name="expiresAt"
             type="date"
-            className="h-12 rounded-xl border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] focus:ring-black dark:focus:ring-white transition-all text-base"
+            className="h-12 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-base"
             defaultValue={
               discount?.expiresAt
                 ? new Date(discount.expiresAt).toISOString().split("T")[0]
@@ -150,7 +150,7 @@ function DiscountForm({
       <Button 
         type="submit" 
         disabled={loading} 
-        className="w-full h-14 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-all shadow-xl shadow-black/10 dark:shadow-white/10 mt-4"
+        className="w-full h-14 rounded-2xl bg-black text-white font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-all shadow-xl shadow-black/10 mt-4"
       >
         {loading ? (
           <Loader2 className="w-5 h-5 animate-spin" />
@@ -244,26 +244,26 @@ export function DiscountsClient({ discounts }: { discounts: Discount[] }) {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-black dark:text-white">Active Privilege Keys</h2>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/40 dark:text-white/40">Archive of all promotional value overrides</p>
+          <h2 className="text-xl font-bold text-black">Active Privilege Keys</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/40">Archive of all promotional value overrides</p>
         </div>
         <Button
           onClick={() => {
             setEditing(null)
             setDialogOpen(true)
           }}
-          className="h-12 px-6 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-all shadow-xl shadow-black/10 dark:shadow-white/10"
+          className="h-12 px-6 rounded-xl bg-black text-white font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-all shadow-xl shadow-black/10"
         >
           <Plus className="w-4 h-4 mr-2" /> Forge New Key
         </Button>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
         <DataTable
           columns={columns.map(col => ({
             ...col,
             header: (
-              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40 dark:text-white/40">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-black/40">
                 {col.header as string}
               </span>
             )
@@ -274,12 +274,12 @@ export function DiscountsClient({ discounts }: { discounts: Discount[] }) {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl border-black/10 dark:border-white/10 bg-white dark:bg-zinc-950 p-8">
+        <DialogContent className="max-w-2xl rounded-3xl border-black/10 bg-white p-8">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-bold text-black dark:text-white tracking-tight">
+            <DialogTitle className="text-2xl font-bold text-black tracking-tight">
               {editing ? "Override Protocol" : "Initialize New Key"}
             </DialogTitle>
-            <p className="text-xs font-bold uppercase tracking-widest text-black/30 dark:text-white/30 mt-1">Configure the parameters for value adjustment</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-black/30 mt-1">Configure the parameters for value adjustment</p>
           </DialogHeader>
           <DiscountForm
             discount={editing}
@@ -296,10 +296,10 @@ export function DiscountsClient({ discounts }: { discounts: Discount[] }) {
       </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
-        <AlertDialogContent className="rounded-3xl border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 p-8">
+        <AlertDialogContent className="rounded-3xl border-black/10 bg-white p-8">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold text-black dark:text-white">Decommission Key?</AlertDialogTitle>
-            <AlertDialogDescription className="text-black/60 dark:text-white/60">
+            <AlertDialogTitle className="text-xl font-bold text-black">Decommission Key?</AlertDialogTitle>
+            <AlertDialogDescription className="text-black/60">
               This will permanently revoke the privilege key from the archive. This action is irreversible.
             </AlertDialogDescription>
           </AlertDialogHeader>

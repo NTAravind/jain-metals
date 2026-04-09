@@ -51,16 +51,16 @@ export function DataTable<T extends { id: string }>({
             placeholder={searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="max-w-md h-12 pl-4 rounded-xl border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] focus:ring-black dark:focus:ring-white transition-all text-sm font-medium"
+            className="max-w-md h-12 pl-4 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-sm font-medium"
           />
         </div>
       )}
-      <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-black/5 bg-white overflow-hidden shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01] hover:bg-transparent">
+            <TableRow className="border-b border-black/5 bg-black/[0.01] hover:bg-transparent">
               {columns.map((col) => (
-                <TableHead key={col.key} className={`h-14 px-8 font-bold uppercase tracking-widest text-[10px] text-black/40 dark:text-white/40 ${col.className}`}>
+                <TableHead key={col.key} className={`h-14 px-8 font-bold uppercase tracking-widest text-[10px] text-black/40 ${col.className}`}>
                   {col.header}
                 </TableHead>
               ))}
@@ -71,7 +71,7 @@ export function DataTable<T extends { id: string }>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-24 text-black/30 dark:text-white/30 font-medium italic"
+                  className="text-center py-24 text-black/30 font-medium italic"
                 >
                   {emptyMessage}
                 </TableCell>
@@ -81,14 +81,14 @@ export function DataTable<T extends { id: string }>({
                 <TableRow
                   key={row.id}
                   onClick={() => onRowClick?.(row)}
-                  className={`border-b border-black/5 dark:border-white/5 transition-all duration-200 ${
+                  className={`border-b border-black/5 transition-all duration-200 ${
                     onRowClick
-                      ? "cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                      ? "cursor-pointer hover:bg-black/[0.02]"
                       : "hover:bg-transparent"
                   }`}
                 >
                   {columns.map((col) => (
-                    <TableCell key={col.key} className={`px-8 py-5 text-sm font-medium text-black/80 dark:text-white/80 ${col.className}`}>
+                    <TableCell key={col.key} className={`px-8 py-5 text-sm font-medium text-black/80 ${col.className}`}>
                       {col.cell
                         ? col.cell(row)
                         : String((row as any)[col.key] ?? "")}
@@ -101,7 +101,7 @@ export function DataTable<T extends { id: string }>({
         </Table>
       </div>
       <div className="flex items-center justify-between px-2">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/30 dark:text-white/30">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/30">
           Showing {filtered.length} of {data.length} registered entries
         </p>
       </div>
