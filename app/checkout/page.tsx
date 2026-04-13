@@ -88,7 +88,7 @@ export default function CheckoutPage() {
 
   // Delivery fee
   const [deliveryFee, setDeliveryFee] = useState<number | null>(null)
-  const [deliveryZone, setDeliveryZone] = useState<string | null>(null)
+  const [deliveryInfo, setDeliveryInfo] = useState<{ serviceable: boolean; city?: string; state?: string } | null>(null)
   const [feeLoading, setFeeLoading] = useState(false)
 
   // Success Modal
@@ -154,20 +154,21 @@ export default function CheckoutPage() {
     async (pincode: string) => {
       if (pincode.length !== 6) {
         setDeliveryFee(null)
-        setDeliveryZone(null)
+        setDeliveryInfo(null)
         return
       }
       setFeeLoading(true)
       try {
-        const { fee, zone } = await getDeliveryFeeAction(
+        const result = await getDeliveryFeeAction(
           pincode,
           subtotal,
           totalWeightKg,
         )
-        setDeliveryFee(fee)
-        setDeliveryZone(zone)
+        setDeliveryFee(result.fee)
+        setDeliveryInfo({ serviceable: result.serviceable, city: result.city, state: result.state })
       } catch {
         setDeliveryFee(null)
+        setDeliveryInfo(null)
       } finally {
         setFeeLoading(false)
       }
@@ -180,7 +181,7 @@ export default function CheckoutPage() {
       calculateFee(form.pincode)
     } else if (mode === "pickup") {
       setDeliveryFee(0)
-      setDeliveryZone(null)
+      setDeliveryInfo(null)
     }
   }, [form.pincode, mode, calculateFee])
 
@@ -214,7 +215,6 @@ export default function CheckoutPage() {
 
   const handleSaveAddress = async () => {
     if (mode === "pickup") {
-      // Pickup: just validate name/phone and proceed
       if (!pickupForm.fullName.trim() || !pickupForm.phone.trim()) {
         toast.error("Please fill in your name and phone number")
         return
@@ -223,8 +223,7 @@ export default function CheckoutPage() {
       return
     }
 
-    // Delivery: validate and save address
-    const required = ["fullName", "phone", "line1", "city", "state", "pincode"] as const
+    const required = ["fullName", "phone", "line1", "pincode"] as const
     for (const key of required) {
       if (!form[key]?.trim()) {
         toast.error(`Please fill in ${key === "line1" ? "your address" : key}`)
@@ -237,6 +236,11 @@ export default function CheckoutPage() {
     }
     if (!/^\d{6}$/.test(form.pincode)) {
       toast.error("Please enter a valid 6-digit pincode")
+      return
+    }
+
+    if (!deliveryInfo?.serviceable) {
+      toast.error("Sorry, we don't deliver to this pincode yet")
       return
     }
 
@@ -486,16 +490,35 @@ export default function CheckoutPage() {
                                  />
                               </div>
                            </div>
-                           <div className="space-y-3">
-                              <label className="text-xs uppercase tracking-[0.2em] font-bold text-brand-navy/70">Registry Pincode</label>
-                              <Input
-                                 value={form.pincode}
-                                 maxLength={6}
-                                 onChange={(e) => handleAddressChange("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))}
-                                 className="rounded-sm border-x border-t border-b border-brand-brass/30 focus-visible:ring-1 focus-visible:ring-brand-gold h-14 bg-white px-4 text-brand-navy font-serif text-lg shadow-sm"
-                              />
-                              {feeLoading && <p className="text-xs italic text-brand-gold font-bold uppercase tracking-[0.2em] pt-2">Calculating Official Logistics...</p>}
-                           </div>
+                            <div className="space-y-3">
+                               <label className="text-xs uppercase tracking-[0.2em] font-bold text-brand-navy/70">Registry Pincode</label>
+                               <Input
+                                  value={form.pincode}
+                                  maxLength={6}
+                                  onChange={(e) => handleAddressChange("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                  className={cn(
+                                    "rounded-sm border-x border-t border-b h-14 bg-white px-4 font-serif text-lg shadow-sm",
+                                    deliveryInfo?.serviceable === true ? "border-green-500/50 focus-visible:ring-green-500" : 
+                                    deliveryInfo?.serviceable === false ? "border-red-500/50 focus-visible:ring-red-500" :
+                                    "border-brand-brass/30 focus-visible:ring-brand-gold"
+                                  )}
+                               />
+                               {feeLoading && <p className="text-xs italic text-brand-gold font-bold uppercase tracking-[0.2em] pt-2">Checking delivery availability...</p>}
+                               {!feeLoading && form.pincode.length === 6 && deliveryInfo && (
+                                 <div className={cn(
+                                   "text-xs font-bold uppercase tracking-[0.2em] pt-2",
+                                   deliveryInfo.serviceable ? "text-green-600" : "text-red-500"
+                                 )}>
+                                   {deliveryInfo.serviceable 
+                                     ? `✓ Delivery available to ${deliveryInfo.city}, ${deliveryInfo.state}`
+                                     : "✗ Sorry, we don't deliver to this pincode yet"
+                                   }
+                                 </div>
+                               )}
+                               {!feeLoading && form.pincode.length === 6 && !deliveryInfo && (
+                                 <p className="text-xs italic text-brand-navy/50 pt-2">Enter 6-digit pincode</p>
+                               )}
+                            </div>
                         </div>
                      ) : (
                         <div className="grid md:grid-cols-2 gap-12">
@@ -635,17 +658,26 @@ export default function CheckoutPage() {
                       </div>
 
                       <div className="space-y-4">
-                         <div className="flex justify-between items-center">
-                            <span className="text-brand-navy/60 uppercase tracking-[0.2em] font-bold text-xs">Subtotal</span>
-                            <span className="font-serif text-brand-navy text-xl">₹{subtotal.toLocaleString("en-IN")}</span>
+                          <div className="flex justify-between items-center">
+                             <span className="text-brand-navy/60 uppercase tracking-[0.2em] font-bold text-xs">Subtotal</span>
+                             <span className="font-serif text-brand-navy text-xl">₹{subtotal.toLocaleString("en-IN")}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                             <span className="text-brand-navy/60 uppercase tracking-[0.2em] font-bold text-xs">Delivery</span>
+                            <span className="font-sans text-brand-navy font-bold text-sm">
+                               {mode === "pickup" ? "Exclusive (Complimentary)" : 
+                                !deliveryInfo?.serviceable ? "Not Available" :
+                                deliveryFee === null ? "..." : 
+                                deliveryFee === 0 ? "Complimentary" : "₹" + deliveryFee.toLocaleString("en-IN")}
+                            </span>
                          </div>
-                         <div className="flex justify-between items-center">
-                            <span className="text-brand-navy/60 uppercase tracking-[0.2em] font-bold text-xs">Delivery</span>
-                           <span className="font-sans text-brand-navy font-bold text-sm">
-                              {mode === "pickup" ? "Exclusive (Complimentary)" : (deliveryFee === null ? "..." : (deliveryFee === 0 ? "Complimentary" : "₹" + deliveryFee.toLocaleString("en-IN")))}
-                           </span>
-                        </div>
-                     </div>
+                         {mode === "delivery" && deliveryInfo?.serviceable && deliveryInfo.city && (
+                           <div className="flex justify-between items-center">
+                              <span className="text-brand-navy/40 uppercase tracking-[0.2em] font-bold text-[10px]">To</span>
+                              <span className="font-sans text-brand-navy/60 text-xs">{deliveryInfo.city}, {deliveryInfo.state}</span>
+                           </div>
+                         )}
+                      </div>
                   </div>
 
                    <div className="pt-8 mt-auto border-t border-brand-navy bg-brand-navy/[0.03] -mx-10 -mb-10 px-10 pb-10 space-y-6">

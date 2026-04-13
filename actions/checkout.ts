@@ -80,12 +80,13 @@ export async function getDeliveryFeeAction(
   pincode: string,
   subtotal: number,
   totalWeightKg: number,
-): Promise<{ fee: number; zone: string }> {
-  if (!/^\d{6}$/.test(pincode)) return { fee: 0, zone: "UNKNOWN" }
-  const { getDeliveryZone } = await import("@/dal/delivery")
-  const zone = getDeliveryZone(pincode)
+): Promise<{ fee: number; serviceable: boolean; city?: string; state?: string }> {
+  if (!/^\d{6}$/.test(pincode)) return { fee: 0, serviceable: false }
+  const { getDeliveryInfo } = await import("@/dal/delivery")
+  const info = await getDeliveryInfo(pincode)
+  if (!info || !info.serviceable) return { fee: 0, serviceable: false }
   const fee = await calculateDeliveryFee(pincode, totalWeightKg, subtotal)
-  return { fee, zone }
+  return { fee, serviceable: true, city: info.city, state: info.state }
 }
 
 // ── STEP 1: Create Razorpay order ─────────────────────────────────────────────

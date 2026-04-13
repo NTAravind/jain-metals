@@ -23,8 +23,10 @@ interface DataTableProps<T extends { id: string }> {
   data: T[]
   onRowClick?: (row: T) => void
   searchKey?: keyof T
+  searchKeys?: (keyof T)[]
   searchPlaceholder?: string
   emptyMessage?: string
+  searchable?: boolean
 }
 
 export function DataTable<T extends { id: string }>({
@@ -32,20 +34,33 @@ export function DataTable<T extends { id: string }>({
   data,
   onRowClick,
   searchKey,
+  searchKeys,
   searchPlaceholder = "Find matching records...",
   emptyMessage = "No results archived.",
+  searchable,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("")
 
-  const filtered = searchKey
-    ? data.filter((row) =>
-        String(row[searchKey]).toLowerCase().includes(search.toLowerCase()),
-      )
+  const shouldSearch = searchable || searchKey || searchKeys
+
+  const filtered = shouldSearch
+    ? data.filter((row) => {
+        const term = search.toLowerCase()
+        if (searchKeys) {
+          return searchKeys.some((key) =>
+            String(row[key]).toLowerCase().includes(term)
+          )
+        }
+        if (searchKey) {
+          return String(row[searchKey]).toLowerCase().includes(term)
+        }
+        return true
+      })
     : data
 
   return (
     <div className="space-y-6">
-      {searchKey && (
+      {shouldSearch && (
         <div className="relative group">
           <Input
             placeholder={searchPlaceholder}

@@ -18,6 +18,7 @@ import {
   Tag,
   Users,
   List,
+  Truck,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -28,6 +29,7 @@ const navItems = [
   { label: "Products", href: "/admin/products", icon: Package2 },
   { label: "Categories", href: "/admin/categories", icon: List },
   { label: "Discounts", href: "/admin/discounts", icon: Tag },
+  { label: "Delivery", href: "/admin/delivery", icon: Truck },
   { label: "Customers", href: "/admin/customers", icon: Users },
 ]
 
