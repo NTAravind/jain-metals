@@ -38,7 +38,7 @@ export default async function HomePage() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="ghost" className="text-brand-navy border border-brand-navy/10 hover:bg-brand-navy/5 transition-all text-sm px-12 h-14 rounded-none uppercase tracking-[0.2em] font-bold">
-                <Link href="/products">
+                <Link href="/story">
                   Our Story
                 </Link>
               </Button>

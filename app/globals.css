@@ -3,8 +3,8 @@
 
 
 
-html {
-  color-scheme: light;
+html, :root {
+  color-scheme: light !important;
 }
 
 /* ─── Brand Tokens ────────────────────────────────────────────────────────── */
@@ -63,6 +63,8 @@ html {
 
 /* ─── Tailwind @theme registration ───────────────────────────────────────── */
 @theme {
+  --variant-dark: (&:where(.dark, .dark *));
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -48,6 +48,7 @@ export function Footer() {
         <div className="space-y-8">
           <h4 className="font-bold text-[10px] uppercase tracking-[0.4em] text-white/40">Operational</h4>
           <ul className="space-y-5 text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">
+            <li><Link href="/story" className="hover:text-white transition-colors">Our Story</Link></li>
             <li><Link href="/shipping" className="hover:text-white transition-colors">Shipping Info</Link></li>
             <li><Link href="/returns" className="hover:text-white transition-colors">Returns</Link></li>
             <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
