@@ -251,7 +251,7 @@ const PRODUCTS: RawProduct[] = [
 
 // ─── Seed ─────────────────────────────────────────────────────────────────────
 
-async function main() {
+export async function seedAdmin() {
   // 1. Upsert categories → build key→id map
   console.log("\n📂 Seeding categories…");
   const CAT: Record<string, string> = {};
@@ -326,7 +326,3 @@ async function main() {
 
   console.log("\n✅  Done.\n");
 }
-
-main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(() => prisma.$disconnect());

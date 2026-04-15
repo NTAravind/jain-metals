@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db"
 import type { Product } from "@/app/generated/prisma/client"
 import { requireCustomer } from "@/lib/auth-guards"
 import { validateCoupon } from "@/dal/discounts"
-import { calculateDeliveryFee } from "@/dal/delivery"
+import { calculateDeliveryFee, calculateDeliveryFeeByState } from "@/dal/delivery"
 import Razorpay from "razorpay"
 import { z } from "zod"
 import crypto from "crypto"
@@ -80,13 +80,32 @@ export async function getDeliveryFeeAction(
   pincode: string,
   subtotal: number,
   totalWeightKg: number,
+  state?: string,
 ): Promise<{ fee: number; serviceable: boolean; city?: string; state?: string }> {
-  if (!/^\d{6}$/.test(pincode)) return { fee: 0, serviceable: false }
-  const { getDeliveryInfo } = await import("@/dal/delivery")
-  const info = await getDeliveryInfo(pincode)
-  if (!info || !info.serviceable) return { fee: 0, serviceable: false }
-  const fee = await calculateDeliveryFee(pincode, totalWeightKg, subtotal)
-  return { fee, serviceable: true, city: info.city, state: info.state }
+  let serviceable = false
+  let fee = 0
+
+  // First try pincode-level pricing
+  if (/^\d{6}$/.test(pincode)) {
+    const { getDeliveryInfo, calculateDeliveryFee } = await import("@/dal/delivery")
+    const info = await getDeliveryInfo(pincode)
+    if (info && info.serviceable) {
+      fee = await calculateDeliveryFee(pincode, totalWeightKg, subtotal)
+      serviceable = true
+      return { fee, serviceable: true, city: info.city, state: info.state }
+    }
+  }
+
+  // Fall back to state-level pricing
+  if (state) {
+    const { calculateDeliveryFeeByState } = await import("@/dal/delivery")
+    fee = await calculateDeliveryFeeByState(state, totalWeightKg, subtotal)
+    if (fee > 0) {
+      return { fee, serviceable: true, state }
+    }
+  }
+
+  return { fee: 0, serviceable: false }
 }
 
 // ── STEP 1: Create Razorpay order ─────────────────────────────────────────────
@@ -120,6 +139,13 @@ export async function createRazorpayOrder(
     if (!finalAddressId) throw new Error("Address ID is required for delivery")
     const address = await prisma.address.findUnique({ where: { id: finalAddressId } })
     if (!address || address.userId !== user.id) throw new Error("Invalid address")
+  }
+
+  // Get address for state info (used for state-level pricing fallback)
+  let addressState: string | undefined
+  if (!isPickup && finalAddressId) {
+    const addr = await prisma.address.findUnique({ where: { id: finalAddressId } })
+    addressState = addr?.state
   }
 
   const products = await prisma.product.findMany({
@@ -166,7 +192,17 @@ export async function createRazorpayOrder(
     return sum + (vr.weightKg ?? 1) * item.quantity
   }, 0)
 
-  const deliveryFee = isPickup ? 0 : await calculateDeliveryFee(pincode || "000000", totalWeightKg, subtotal)
+  // Try pincode first, then fall back to state-level pricing
+  let deliveryFee = 0
+  if (!isPickup) {
+    if (pincode) {
+      deliveryFee = await calculateDeliveryFee(pincode, totalWeightKg, subtotal)
+    }
+    // If pincode not configured, try state-level pricing
+    if (deliveryFee === 0 && addressState) {
+      deliveryFee = await calculateDeliveryFeeByState(addressState, totalWeightKg, subtotal)
+    }
+  }
 
   let discountAmount = 0
   let discountId: string | undefined

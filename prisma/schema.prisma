@@ -152,6 +152,37 @@ model DeliveryPincode {
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@index([state])
+}
+
+model StateDelivery {
+  id             String    @id @default(cuid())
+  state          String    @unique
+  codAvailable   Boolean   @default(false)
+  basePrice      Decimal   @db.Decimal(10, 2)
+  pricePerKg     Decimal   @db.Decimal(10, 2)
+  freeAboveValue Decimal?  @db.Decimal(10, 2)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([state])
+}
+
+model InternationalDelivery {
+  id             String    @id @default(cuid())
+  country        String    @unique
+  countryCode    String?   @unique
+  basePrice      Decimal   @db.Decimal(10, 2)
+  pricePerKg     Decimal   @db.Decimal(10, 2)
+  freeAboveValue Decimal?  @db.Decimal(10, 2)
+  deliveryDays   String?   // e.g., "5-7 days"
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([country])
 }
 
 model Order {

@@ -88,6 +88,36 @@ export const getAllProductsAdmin = cache(async () => {
   return products.map(serializeProduct)
 })
 
+export const getProductsAdminPaginated = cache(async (
+  page = 1,
+  pageSize = 10,
+  q?: string
+) => {
+  const where: any = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { sku: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : {}
+
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: {
+        category: true,
+        variants: { orderBy: { sortOrder: "asc" } },
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.product.count({ where }),
+  ])
+  return { products: products.map(serializeProduct), total, pages: Math.ceil(total / pageSize) }
+})
+
 export async function createProduct(data: {
   name: string
   slug: string

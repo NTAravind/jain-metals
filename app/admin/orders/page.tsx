@@ -1,8 +1,16 @@
-import { getAllOrders } from "@/dal/orders"
+import { getOrdersPaginated } from "@/dal/orders"
 import { OrdersTable } from "@/components/admin/orders-table"
 
-export default async function AdminOrdersPage() {
-  const orders = await getAllOrders()
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams
+  const page = Number(params?.page) || 1
+  const search = typeof params?.search === "string" ? params.search : undefined
+
+  const { orders, pages, total } = await getOrdersPaginated(page, 10, search)
 
   const serializedOrders = orders.map((order) => ({
     ...order,
@@ -19,7 +27,12 @@ export default async function AdminOrdersPage() {
         <p className="text-black/50 mt-1 font-medium">Track and fulfill customer acquisitions</p>
       </div>
       <div className="bg-white rounded-2xl border border-black/10 overflow-hidden shadow-xl shadow-black/[0.02]">
-        <OrdersTable orders={serializedOrders} />
+        <OrdersTable 
+           orders={serializedOrders} 
+           pageCount={pages}
+           currentPage={page}
+           totalCount={total}
+        />
       </div>
     </div>
   )

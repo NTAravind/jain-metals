@@ -30,6 +30,32 @@ export const getAllDiscounts = cache(async () => {
   return prisma.discount.findMany({ orderBy: { createdAt: "desc" } })
 })
 
+export const getDiscountsPaginated = cache(async (
+  page = 1,
+  pageSize = 10,
+  q?: string
+) => {
+  const where: any = q
+    ? {
+        OR: [
+          { code: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : {}
+
+  const [discounts, total] = await Promise.all([
+    prisma.discount.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.discount.count({ where }),
+  ])
+  return { discounts, total, pages: Math.ceil(total / pageSize) }
+})
+
 export async function createDiscount(data: any) {
   return prisma.discount.create({ data })
 }

@@ -26,6 +26,50 @@ export type DeliveryPincode = {
   updatedAt: Date
 }
 
+export type StateDeliveryInput = {
+  state: string
+  codAvailable?: boolean
+  basePrice: number
+  pricePerKg: number
+  freeAboveValue?: number | null
+  isActive?: boolean
+}
+
+export type StateDelivery = {
+  id: string
+  state: string
+  codAvailable: boolean
+  basePrice: number
+  pricePerKg: number
+  freeAboveValue: number | null
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type InternationalDeliveryInput = {
+  country: string
+  countryCode?: string | null
+  basePrice: number
+  pricePerKg: number
+  freeAboveValue?: number | null
+  deliveryDays?: string | null
+  isActive?: boolean
+}
+
+export type InternationalDelivery = {
+  id: string
+  country: string
+  countryCode: string | null
+  basePrice: number
+  pricePerKg: number
+  freeAboveValue: number | null
+  deliveryDays: string | null
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
 const transformPincode = (p: any): DeliveryPincode => ({
   ...p,
   basePrice: Number(p.basePrice),
@@ -33,12 +77,55 @@ const transformPincode = (p: any): DeliveryPincode => ({
   freeAboveValue: p.freeAboveValue ? Number(p.freeAboveValue) : null,
 })
 
+const transformStateDelivery = (p: any): StateDelivery => ({
+  ...p,
+  basePrice: Number(p.basePrice),
+  pricePerKg: Number(p.pricePerKg),
+  freeAboveValue: p.freeAboveValue ? Number(p.freeAboveValue) : null,
+})
+
+const transformInternationalDelivery = (p: any): InternationalDelivery => ({
+  ...p,
+  basePrice: Number(p.basePrice),
+  pricePerKg: Number(p.pricePerKg),
+  freeAboveValue: p.freeAboveValue ? Number(p.freeAboveValue) : null,
+})
+
+// ─────────────────────────── Pincode Functions ───────────────────────────
+
 export async function getAllDeliveryPincodes(): Promise<DeliveryPincode[]> {
   const pincodes = await prisma.deliveryPincode.findMany({
     orderBy: { pincode: "asc" },
   })
   return pincodes.map(transformPincode)
 }
+
+export const getDeliveryPincodesPaginated = unstable_cache(async (
+  page = 1,
+  pageSize = 10,
+  q?: string
+) => {
+  const where: any = q
+    ? {
+        OR: [
+          { pincode: { contains: q, mode: "insensitive" } },
+          { city: { contains: q, mode: "insensitive" } },
+          { state: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : {}
+
+  const [pincodes, total] = await Promise.all([
+    prisma.deliveryPincode.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { pincode: "asc" },
+    }),
+    prisma.deliveryPincode.count({ where }),
+  ])
+  return { pincodes: pincodes.map(transformPincode), total, pages: Math.ceil(total / pageSize) }
+}, ["paginated-pincodes"], { revalidate: false })
 
 export async function getDeliveryPincodeById(id: string): Promise<DeliveryPincode | null> {
   const pincode = await prisma.deliveryPincode.findUnique({ where: { id } })
@@ -124,13 +211,45 @@ export async function calculateDeliveryFee(
   totalWeightKg: number,
   orderValue: number,
 ): Promise<number> {
-  if (!/^\d{6}$/.test(pincode)) return 0
+  // First try pincode-level pricing
+  if (/^\d{6}$/.test(pincode)) {
+    const pincodeResult = await getDeliveryPincodeByPincode(pincode)
+    if (pincodeResult && pincodeResult.isActive) {
+      if (pincodeResult.freeAboveValue && orderValue >= pincodeResult.freeAboveValue) return 0
+      return Math.ceil(pincodeResult.basePrice + totalWeightKg * pincodeResult.pricePerKg)
+    }
+  }
 
-  const result = await getDeliveryPincodeByPincode(pincode)
-  if (!result || !result.isActive) return 0
+  // Fall back to state-level pricing using the state from address
+  return 0 // State is passed separately in checkout, handled in checkout action
+}
 
-  if (result.freeAboveValue && orderValue >= result.freeAboveValue) return 0
-  return Math.ceil(result.basePrice + totalWeightKg * result.pricePerKg)
+export async function calculateDeliveryFeeByState(
+  state: string,
+  totalWeightKg: number,
+  orderValue: number,
+): Promise<number> {
+  if (!state) return 0
+
+  const stateResult = await getStateDeliveryByState(state)
+  if (!stateResult || !stateResult.isActive) return 0
+
+  if (stateResult.freeAboveValue && orderValue >= stateResult.freeAboveValue) return 0
+  return Math.ceil(stateResult.basePrice + totalWeightKg * stateResult.pricePerKg)
+}
+
+export async function calculateInternationalDeliveryFee(
+  country: string,
+  totalWeightKg: number,
+  orderValue: number,
+): Promise<number> {
+  if (!country) return 0
+
+  const intlResult = await getInternationalDeliveryByCountry(country)
+  if (!intlResult || !intlResult.isActive) return 0
+
+  if (intlResult.freeAboveValue && orderValue >= intlResult.freeAboveValue) return 0
+  return Math.ceil(intlResult.basePrice + totalWeightKg * intlResult.pricePerKg)
 }
 
 export async function isPincodeServiceable(pincode: string): Promise<boolean> {
@@ -165,3 +284,190 @@ export const getDeliveryInfo = unstable_cache(
   ["delivery-info"],
   { revalidate: 3600, tags: ["delivery-pincodes"] }
 )
+
+// ─────────────────────────── State Delivery Functions ───────────────────────────
+
+export async function getAllStateDeliveries(): Promise<StateDelivery[]> {
+  const states = await prisma.stateDelivery.findMany({
+    orderBy: { state: "asc" },
+  })
+  return states.map(transformStateDelivery)
+}
+
+export async function getStateDeliveryByState(state: string): Promise<StateDelivery | null> {
+  const result = await prisma.stateDelivery.findUnique({
+    where: { state },
+  })
+  if (!result) return null
+  return transformStateDelivery(result)
+}
+
+export const getStateDeliveryCached = unstable_cache(
+  async (state: string): Promise<StateDelivery | null> => {
+    const result = await prisma.stateDelivery.findUnique({
+      where: { state },
+    })
+    if (!result) return null
+    return transformStateDelivery(result)
+  },
+  ["state-delivery"],
+  { revalidate: 3600, tags: ["delivery-states"] }
+)
+
+export async function createStateDelivery(data: StateDeliveryInput): Promise<StateDelivery> {
+  const state = await prisma.stateDelivery.create({
+    data: {
+      state: data.state,
+      codAvailable: data.codAvailable ?? false,
+      basePrice: data.basePrice,
+      pricePerKg: data.pricePerKg,
+      freeAboveValue: data.freeAboveValue,
+      isActive: data.isActive ?? true,
+    },
+  })
+  return transformStateDelivery(state)
+}
+
+export async function updateStateDelivery(
+  id: string,
+  data: Partial<StateDeliveryInput>,
+): Promise<StateDelivery> {
+  const state = await prisma.stateDelivery.update({
+    where: { id },
+    data: {
+      ...(data.state !== undefined && { state: data.state }),
+      ...(data.codAvailable !== undefined && { codAvailable: data.codAvailable }),
+      ...(data.basePrice !== undefined && { basePrice: data.basePrice }),
+      ...(data.pricePerKg !== undefined && { pricePerKg: data.pricePerKg }),
+      ...(data.freeAboveValue !== undefined && { freeAboveValue: data.freeAboveValue }),
+      ...(data.isActive !== undefined && { isActive: data.isActive }),
+    },
+  })
+  return transformStateDelivery(state)
+}
+
+export async function deleteStateDelivery(id: string): Promise<void> {
+  await prisma.stateDelivery.delete({ where: { id } })
+}
+
+export async function getStateDeliveriesPaginated(
+  page = 1,
+  pageSize = 10,
+  q?: string
+) {
+  const where: any = q
+    ? { state: { contains: q, mode: "insensitive" } }
+    : {}
+
+  const [states, total] = await Promise.all([
+    prisma.stateDelivery.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { state: "asc" },
+    }),
+    prisma.stateDelivery.count({ where }),
+  ])
+  return { states: states.map(transformStateDelivery), total, pages: Math.ceil(total / pageSize) }
+}
+
+// ─────────────────────────── International Delivery Functions ───────────────────────────
+
+export async function getAllInternationalDeliveries(): Promise<InternationalDelivery[]> {
+  const countries = await prisma.internationalDelivery.findMany({
+    orderBy: { country: "asc" },
+  })
+  return countries.map(transformInternationalDelivery)
+}
+
+export async function getInternationalDeliveryByCountry(country: string): Promise<InternationalDelivery | null> {
+  const result = await prisma.internationalDelivery.findUnique({
+    where: { country },
+  })
+  if (!result) return null
+  return transformInternationalDelivery(result)
+}
+
+export async function getInternationalDeliveryByCountryCode(countryCode: string): Promise<InternationalDelivery | null> {
+  const result = await prisma.internationalDelivery.findUnique({
+    where: { countryCode },
+  })
+  if (!result) return null
+  return transformInternationalDelivery(result)
+}
+
+export const getInternationalDeliveryCached = unstable_cache(
+  async (country: string): Promise<InternationalDelivery | null> => {
+    const result = await prisma.internationalDelivery.findUnique({
+      where: { country },
+    })
+    if (!result) return null
+    return transformInternationalDelivery(result)
+  },
+  ["international-delivery"],
+  { revalidate: 3600, tags: ["delivery-international"] }
+)
+
+export async function createInternationalDelivery(data: InternationalDeliveryInput): Promise<InternationalDelivery> {
+  const country = await prisma.internationalDelivery.create({
+    data: {
+      country: data.country,
+      countryCode: data.countryCode,
+      basePrice: data.basePrice,
+      pricePerKg: data.pricePerKg,
+      freeAboveValue: data.freeAboveValue,
+      deliveryDays: data.deliveryDays,
+      isActive: data.isActive ?? true,
+    },
+  })
+  return transformInternationalDelivery(country)
+}
+
+export async function updateInternationalDelivery(
+  id: string,
+  data: Partial<InternationalDeliveryInput>,
+): Promise<InternationalDelivery> {
+  const country = await prisma.internationalDelivery.update({
+    where: { id },
+    data: {
+      ...(data.country !== undefined && { country: data.country }),
+      ...(data.countryCode !== undefined && { countryCode: data.countryCode }),
+      ...(data.basePrice !== undefined && { basePrice: data.basePrice }),
+      ...(data.pricePerKg !== undefined && { pricePerKg: data.pricePerKg }),
+      ...(data.freeAboveValue !== undefined && { freeAboveValue: data.freeAboveValue }),
+      ...(data.deliveryDays !== undefined && { deliveryDays: data.deliveryDays }),
+      ...(data.isActive !== undefined && { isActive: data.isActive }),
+    },
+  })
+  return transformInternationalDelivery(country)
+}
+
+export async function deleteInternationalDelivery(id: string): Promise<void> {
+  await prisma.internationalDelivery.delete({ where: { id } })
+}
+
+export async function getInternationalDeliveriesPaginated(
+  page = 1,
+  pageSize = 10,
+  q?: string
+) {
+  const where: any = q
+    ? {
+        OR: [
+          { country: { contains: q, mode: "insensitive" } },
+          { countryCode: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : {}
+
+  const [countries, total] = await Promise.all([
+    prisma.internationalDelivery.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { country: "asc" },
+    }),
+    prisma.internationalDelivery.count({ where }),
+  ])
+  return { countries: countries.map(transformInternationalDelivery), total, pages: Math.ceil(total / pageSize) }
+}

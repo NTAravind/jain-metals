@@ -19,6 +19,34 @@ export const getAllOrders = cache(async () => {
   })
 })
 
+export const getOrdersPaginated = cache(async (
+  page = 1,
+  pageSize = 10,
+  q?: string
+) => {
+  const where: any = q
+    ? {
+        OR: [
+          { id: { contains: q, mode: "insensitive" } },
+          { user: { name: { contains: q, mode: "insensitive" } } },
+          { user: { phone: { contains: q, mode: "insensitive" } } },
+        ],
+      }
+    : {}
+
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      include: ORDER_INCLUDE,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.order.count({ where }),
+  ])
+  return { orders, total, pages: Math.ceil(total / pageSize) }
+})
+
 export const getOrderById = cache(async (id: string) => {
   return prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE })
 })

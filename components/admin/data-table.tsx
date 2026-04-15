@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import {
   Table,
   TableBody,
@@ -27,6 +28,10 @@ interface DataTableProps<T extends { id: string }> {
   searchPlaceholder?: string
   emptyMessage?: string
   searchable?: boolean
+  serverSide?: boolean
+  currentPage?: number
+  pageCount?: number
+  totalCount?: number
 }
 
 export function DataTable<T extends { id: string }>({
@@ -38,12 +43,42 @@ export function DataTable<T extends { id: string }>({
   searchPlaceholder = "Find matching records...",
   emptyMessage = "No results archived.",
   searchable,
+  serverSide,
+  currentPage = 1,
+  pageCount = 1,
+  totalCount = 0,
 }: DataTableProps<T>) {
-  const [search, setSearch] = useState("")
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
+  const [search, setSearch] = useState(serverSide ? searchParams.get("search") || "" : "")
 
   const shouldSearch = searchable || searchKey || searchKeys
 
-  const filtered = shouldSearch
+  useEffect(() => {
+    if (!serverSide) return
+    const timeout = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (search) {
+        params.set("search", search)
+      } else {
+        params.delete("search")
+      }
+      params.set("page", "1") // reset to page 1 on new search
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    }, 400)
+    return () => clearTimeout(timeout)
+  }, [search, serverSide, pathname, router, searchParams])
+
+  const handlePageChange = (newPage: number) => {
+    if (!serverSide) return
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("page", newPage.toString())
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  const filtered = (shouldSearch && !serverSide)
     ? data.filter((row) => {
         const term = search.toLowerCase()
         if (searchKeys) {
@@ -115,10 +150,37 @@ export function DataTable<T extends { id: string }>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between px-2">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/30">
-          Showing {filtered.length} of {data.length} registered entries
-        </p>
+      <div className="flex items-center justify-between px-2 pt-4">
+        {serverSide ? (
+           <>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40">
+                Showing {data.length} records {totalCount > 0 && `of ${totalCount} total`}
+              </p>
+              <div className="flex items-center gap-4">
+                 <button
+                    disabled={currentPage <= 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="text-xs font-bold uppercase tracking-widest text-black/60 hover:text-black disabled:opacity-30 transition-all"
+                 >
+                    Previous
+                 </button>
+                 <span className="text-xs font-bold text-black/30">
+                    Page {currentPage} of {Math.max(1, pageCount)}
+                 </span>
+                 <button
+                    disabled={currentPage >= pageCount}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="text-xs font-bold uppercase tracking-widest text-black/60 hover:text-black disabled:opacity-30 transition-all"
+                 >
+                    Next
+                 </button>
+              </div>
+           </>
+        ) : (
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/30">
+            Showing {filtered.length} of {data.length} registered entries
+          </p>
+        )}
       </div>
     </div>
   )

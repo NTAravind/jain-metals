@@ -11,7 +11,17 @@ type Customer = {
   _count: { orders: number }
 }
 
-export function CustomersClient({ customers }: { customers: Customer[] }) {
+export function CustomersClient({ 
+  customers, 
+  pageCount, 
+  currentPage, 
+  totalCount 
+}: { 
+  customers: Customer[]
+  pageCount?: number
+  currentPage?: number
+  totalCount?: number
+}) {
   const router = useRouter()
 
   const columns: Column<Customer>[] = [
@@ -63,6 +73,11 @@ export function CustomersClient({ customers }: { customers: Customer[] }) {
           }))}
           data={customers}
           onRowClick={(r) => router.push(`/admin/customers/${r.id}`)}
+          searchable
+          serverSide={true}
+          pageCount={pageCount}
+          currentPage={currentPage}
+          totalCount={totalCount}
           searchPlaceholder="Identify patron by phone..."
           emptyMessage="No patron records archived yet."
         />

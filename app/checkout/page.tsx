@@ -152,7 +152,8 @@ export default function CheckoutPage() {
   // Live delivery fee when pincode changes
   const calculateFee = useCallback(
     async (pincode: string) => {
-      if (pincode.length !== 6) {
+      // Allow calculation with state even if pincode is not 6 digits
+      if (pincode.length !== 6 && !form.state) {
         setDeliveryFee(null)
         setDeliveryInfo(null)
         return
@@ -163,6 +164,7 @@ export default function CheckoutPage() {
           pincode,
           subtotal,
           totalWeightKg,
+          form.state,
         )
         setDeliveryFee(result.fee)
         setDeliveryInfo({ serviceable: result.serviceable, city: result.city, state: result.state })
@@ -173,17 +175,17 @@ export default function CheckoutPage() {
         setFeeLoading(false)
       }
     },
-    [subtotal, totalWeightKg],
+    [subtotal, totalWeightKg, form.state],
   )
 
   useEffect(() => {
-    if (mode === "delivery" && form.pincode.length === 6) {
+    if (mode === "delivery" && (form.pincode.length === 6 || form.state)) {
       calculateFee(form.pincode)
     } else if (mode === "pickup") {
       setDeliveryFee(0)
       setDeliveryInfo(null)
     }
-  }, [form.pincode, mode, calculateFee])
+  }, [form.pincode, form.state, mode, calculateFee])
 
   const handleAddressChange = useCallback((key: keyof typeof DELIVERY_FORM_INITIAL, value: string) => {
     setForm((p) => ({ ...p, [key]: value }))

@@ -38,7 +38,7 @@ export default function StoryPage() {
             </div>
           </div>
           <div className="aspect-[4/5] bg-brand-navy/5 relative overflow-hidden border border-brand-brass/20 p-2">
-             <img src="/images/brand/promo_statue.jpg" alt="Brass Craftsmanship" className="w-full h-full object-cover opacity-80 mix-blend-multiply" onError={(e) => e.currentTarget.style.display = "none"} />
+             <img src="/images/brand/promo_statue.jpg" alt="Brass Craftsmanship" className="w-full h-full object-cover opacity-80 mix-blend-multiply" />
              <div className="absolute inset-0 bg-brand-gold/5 pointer-events-none" />
           </div>
         </div>

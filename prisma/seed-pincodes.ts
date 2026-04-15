@@ -57,7 +57,7 @@ function parseCSV(csvContent: string): CSVRow[] {
   return rows;
 }
 
-async function seedPincodes() {
+export async function seedPincodes() {
   console.log("🚀 Starting pincode seed...");
 
   try {
@@ -130,12 +130,3 @@ async function seedPincodes() {
   }
 }
 
-seedPincodes()
-  .then((result) => {
-    console.log("Result:", result);
-    process.exit(0);
-  })
-  .catch((err) => {
-    console.error("Fatal error:", err);
-    process.exit(1);
-  });

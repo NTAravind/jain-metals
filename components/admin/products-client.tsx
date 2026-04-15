@@ -30,7 +30,17 @@ type Product = {
   isActive: boolean
 }
 
-export function ProductsClient({ products }: { products: Product[] }) {
+export function ProductsClient({ 
+  products, 
+  pageCount, 
+  currentPage, 
+  totalCount 
+}: { 
+  products: Product[]
+  pageCount?: number
+  currentPage?: number
+  totalCount?: number
+}) {
   const router = useRouter()
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
@@ -120,7 +130,11 @@ export function ProductsClient({ products }: { products: Product[] }) {
         <DataTable
           columns={columns}
           data={products}
-          searchKey="name"
+          searchable
+          serverSide={true}
+          pageCount={pageCount}
+          currentPage={currentPage}
+          totalCount={totalCount}
           searchPlaceholder="Search products..."
           emptyMessage="No products yet. Add your first one!"
         />

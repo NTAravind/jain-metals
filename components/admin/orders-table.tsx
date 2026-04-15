@@ -24,7 +24,17 @@ const statusColorMap: Record<string, string> = {
   PENDING: "bg-black/5 text-black/40 border border-black/10 hover:bg-black/10",
 }
 
-export function OrdersTable({ orders }: { orders: Order[] }) {
+export function OrdersTable({ 
+  orders, 
+  pageCount, 
+  currentPage, 
+  totalCount 
+}: { 
+  orders: Order[]
+  pageCount?: number
+  currentPage?: number
+  totalCount?: number
+}) {
   const router = useRouter()
 
   const columns: Column<Order>[] = [
@@ -82,6 +92,11 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
       columns={columns}
       data={orders}
       onRowClick={(row) => router.push(`/admin/orders/${row.id}`)}
+      searchable
+      serverSide={true}
+      pageCount={pageCount}
+      currentPage={currentPage}
+      totalCount={totalCount}
       searchPlaceholder="Search by order #..."
       emptyMessage="No orders yet."
     />

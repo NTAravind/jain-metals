@@ -164,7 +164,17 @@ function DiscountForm({
   )
 }
 
-export function DiscountsClient({ discounts }: { discounts: Discount[] }) {
+export function DiscountsClient({ 
+  discounts, 
+  pageCount, 
+  currentPage, 
+  totalCount 
+}: { 
+  discounts: Discount[]
+  pageCount?: number
+  currentPage?: number
+  totalCount?: number
+}) {
   const router = useRouter()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Discount | null>(null)
@@ -269,6 +279,12 @@ export function DiscountsClient({ discounts }: { discounts: Discount[] }) {
             )
           }))}
           data={discounts}
+          searchable
+          serverSide={true}
+          pageCount={pageCount}
+          currentPage={currentPage}
+          totalCount={totalCount}
+          searchPlaceholder="Search keys..."
           emptyMessage="No privilege keys found in the registry."
         />
       </div>
