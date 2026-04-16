@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { deleteProductAction } from "@/actions/products"
 import { DataTable, type Column } from "@/components/admin/data-table"
 import { Badge } from "@/components/ui/badge"
@@ -15,10 +15,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
 import { Plus, Pencil, Trash2 } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type Product = {
   id: string
@@ -30,19 +31,53 @@ type Product = {
   isActive: boolean
 }
 
+type Category = {
+  id: string
+  name: string
+}
+
 export function ProductsClient({ 
   products, 
   pageCount, 
   currentPage, 
-  totalCount 
+  totalCount,
+  categories,
+  activeCategory,
+  activeStock,
 }: { 
   products: Product[]
   pageCount?: number
   currentPage?: number
   totalCount?: number
+  categories: Category[]
+  activeCategory?: string
+  activeStock?: string
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [deleteId, setDeleteId] = useState<string | null>(null)
+
+  const handleCategoryChange = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === "all") {
+      params.delete("category")
+    } else {
+      params.set("category", value)
+    }
+    params.delete("page")
+    router.push(`/admin/products?${params.toString()}`)
+  }, [router, searchParams])
+
+  const handleStockChange = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === "all") {
+      params.delete("stock")
+    } else {
+      params.set("stock", value)
+    }
+    params.delete("page")
+    router.push(`/admin/products?${params.toString()}`)
+  }, [router, searchParams])
 
   const columns: Column<Product>[] = [
     { key: "name", header: "Name" },
@@ -137,6 +172,31 @@ export function ProductsClient({
           totalCount={totalCount}
           searchPlaceholder="Search products..."
           emptyMessage="No products yet. Add your first one!"
+          filterSlot={
+            <div className="flex gap-2">
+              <Select value={activeCategory ?? "all"} onValueChange={handleCategoryChange}>
+                <SelectTrigger className="w-[180px] h-10 rounded-xl border-black/10 bg-white">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={activeStock ?? "all"} onValueChange={handleStockChange}>
+                <SelectTrigger className="w-[160px] h-10 rounded-xl border-black/10 bg-white">
+                  <SelectValue placeholder="Stock" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stock</SelectItem>
+                  <SelectItem value="in_stock">In Stock</SelectItem>
+                  <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          }
         />
       </div>
 

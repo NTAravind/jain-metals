@@ -9,8 +9,9 @@ export default async function AdminCustomersPage({
   const params = await searchParams
   const page = Number(params?.page) || 1
   const search = typeof params?.search === "string" ? params.search : undefined
+  const hasOrders = typeof params?.hasOrders === "string" ? params.hasOrders : undefined
 
-  const { customers, pages, total } = await getCustomersPaginated(page, 10, search)
+  const { customers, pages, total } = await getCustomersPaginated(page, 10, search, hasOrders)
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
@@ -23,6 +24,7 @@ export default async function AdminCustomersPage({
            pageCount={pages}
            currentPage={page}
            totalCount={total}
+           activeHasOrders={hasOrders}
         />
       </div>
     </div>

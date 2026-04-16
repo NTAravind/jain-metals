@@ -14,6 +14,7 @@ import {
   createStateDelivery,
   updateStateDelivery,
   deleteStateDelivery,
+  applyRatesToStatePincodes,
   createInternationalDelivery,
   updateInternationalDelivery,
   deleteInternationalDelivery,
@@ -201,4 +202,28 @@ export async function deleteInternationalDeliveryAction(id: string) {
   revalidateTag(CACHE_TAG_INTL, "default")
   revalidatePath("/admin/delivery")
   return { success: true }
+}
+
+// ─────────────────────────── Apply State Rates to Pincodes ───────────────────────────
+
+const ApplyStateToPincodesSchema = z.object({
+  state: z.string().min(1, "State is required"),
+  basePrice: z.coerce.number().min(0),
+  pricePerKg: z.coerce.number().min(0),
+  freeAboveValue: z.coerce.number().optional(),
+  codAvailable: z.coerce.boolean().optional(),
+})
+
+export async function applyStateRatesToPincodesAction(formData: FormData) {
+  await requireAdmin()
+  const data = ApplyStateToPincodesSchema.parse(Object.fromEntries(formData))
+  const result = await applyRatesToStatePincodes(data.state, {
+    basePrice: data.basePrice,
+    pricePerKg: data.pricePerKg,
+    freeAboveValue: data.freeAboveValue ?? null,
+    codAvailable: data.codAvailable,
+  })
+  revalidateTag(CACHE_TAG, "default")
+  revalidatePath("/admin/delivery")
+  return { success: true, updated: result.updated }
 }

@@ -1,4 +1,5 @@
 import { getProductsAdminPaginated } from "@/dal/products"
+import { getAllCategories } from "@/dal/categories"
 import { ProductsClient } from "@/components/admin/products-client"
 
 export const dynamic = "force-dynamic"
@@ -11,10 +12,14 @@ export default async function AdminProductsPage({
   const params = await searchParams
   const page = Number(params?.page) || 1
   const search = typeof params?.search === "string" ? params.search : undefined
+  const category = typeof params?.category === "string" ? params.category : undefined
+  const stock = typeof params?.stock === "string" ? params.stock : undefined
 
-  const { products, pages, total } = await getProductsAdminPaginated(page, 10, search)
+  const [{ products, pages, total }, categories] = await Promise.all([
+    getProductsAdminPaginated(page, 10, search, category, stock),
+    getAllCategories(),
+  ])
 
-  // Map exactly what ProductsClient expects + resolve null categoryId to string | null
   const formattedProducts = products.map(p => ({
     id: p.id,
     name: p.name,
@@ -27,10 +32,13 @@ export default async function AdminProductsPage({
 
   return (
     <ProductsClient 
-       products={formattedProducts} 
+       products={formattedProducts}
+       categories={categories}
        pageCount={pages}
        currentPage={page}
        totalCount={total}
+       activeCategory={category}
+       activeStock={stock}
     />
   )
 }

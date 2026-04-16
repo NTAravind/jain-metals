@@ -18,7 +18,8 @@ export const getAllCustomers = cache(async () => {
 export const getCustomersPaginated = cache(async (
   page = 1,
   pageSize = 10,
-  q?: string
+  q?: string,
+  hasOrders?: string
 ) => {
   const where: any = {
     role: "CUSTOMER",
@@ -28,6 +29,12 @@ export const getCustomersPaginated = cache(async (
         { phone: { contains: q, mode: "insensitive" } },
       ],
     } : {})
+  }
+
+  if (hasOrders === "with_orders") {
+    where.orders = { some: {} }
+  } else if (hasOrders === "no_orders") {
+    where.orders = { none: {} }
   }
 
   const [customers, total] = await Promise.all([

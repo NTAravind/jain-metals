@@ -32,6 +32,7 @@ interface DataTableProps<T extends { id: string }> {
   currentPage?: number
   pageCount?: number
   totalCount?: number
+  filterSlot?: React.ReactNode
 }
 
 export function DataTable<T extends { id: string }>({
@@ -47,6 +48,7 @@ export function DataTable<T extends { id: string }>({
   currentPage = 1,
   pageCount = 1,
   totalCount = 0,
+  filterSlot,
 }: DataTableProps<T>) {
   const router = useRouter()
   const pathname = usePathname()
@@ -95,16 +97,19 @@ export function DataTable<T extends { id: string }>({
 
   return (
     <div className="space-y-6">
-      {shouldSearch && (
-        <div className="relative group">
-          <Input
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-md h-12 pl-4 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-sm font-medium"
-          />
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative group flex-1 max-w-md">
+          {shouldSearch && (
+            <Input
+              placeholder={searchPlaceholder}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="max-w-md h-12 pl-4 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-sm font-medium"
+            />
+          )}
         </div>
-      )}
+        {filterSlot}
+      </div>
       <div className="rounded-2xl border border-black/5 bg-white overflow-hidden shadow-sm">
         <Table>
           <TableHeader>

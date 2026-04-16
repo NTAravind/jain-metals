@@ -100,6 +100,65 @@ export async function getAllDeliveryPincodes(): Promise<DeliveryPincode[]> {
   return pincodes.map(transformPincode)
 }
 
+/**
+ * Returns all distinct state names from the DeliveryPincode table,
+ * along with whether all pincodes in that state share the same rates.
+ */
+export async function getDistinctPincodeStates(): Promise<{
+  state: string
+  pincodeCount: number
+  commonBasePrice: number | null
+  commonPricePerKg: number | null
+}[]> {
+  const grouped = await prisma.deliveryPincode.groupBy({
+    by: ["state"],
+    _count: { state: true },
+    _min: { basePrice: true, pricePerKg: true },
+    _max: { basePrice: true, pricePerKg: true },
+    orderBy: { state: "asc" },
+  })
+
+  return grouped.map((g) => {
+    const minBase = Number(g._min.basePrice ?? 0)
+    const maxBase = Number(g._max.basePrice ?? 0)
+    const minKg = Number(g._min.pricePerKg ?? 0)
+    const maxKg = Number(g._max.pricePerKg ?? 0)
+    return {
+      state: g.state,
+      pincodeCount: g._count.state,
+      // If min == max, all pincodes share the same rate
+      commonBasePrice: minBase === maxBase ? minBase : null,
+      commonPricePerKg: minKg === maxKg ? minKg : null,
+    }
+  })
+}
+
+/**
+ * Bulk-updates all DeliveryPincodes in a given state to use the provided rates.
+ */
+export async function applyRatesToStatePincodes(
+  state: string,
+  data: {
+    basePrice: number
+    pricePerKg: number
+    freeAboveValue?: number | null
+    codAvailable?: boolean
+    isActive?: boolean
+  }
+): Promise<{ updated: number }> {
+  const result = await prisma.deliveryPincode.updateMany({
+    where: { state },
+    data: {
+      basePrice: data.basePrice,
+      pricePerKg: data.pricePerKg,
+      ...(data.freeAboveValue !== undefined && { freeAboveValue: data.freeAboveValue }),
+      ...(data.codAvailable !== undefined && { codAvailable: data.codAvailable }),
+      ...(data.isActive !== undefined && { isActive: data.isActive }),
+    },
+  })
+  return { updated: result.count }
+}
+
 export const getDeliveryPincodesPaginated = unstable_cache(async (
   page = 1,
   pageSize = 10,

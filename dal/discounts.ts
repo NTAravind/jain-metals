@@ -33,16 +33,28 @@ export const getAllDiscounts = cache(async () => {
 export const getDiscountsPaginated = cache(async (
   page = 1,
   pageSize = 10,
-  q?: string
+  q?: string,
+  type?: string,
+  active?: string
 ) => {
-  const where: any = q
-    ? {
-        OR: [
-          { code: { contains: q, mode: "insensitive" } },
-          { description: { contains: q, mode: "insensitive" } },
-        ],
-      }
-    : {}
+  const where: any = {}
+
+  if (q) {
+    where.OR = [
+      { code: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+    ]
+  }
+
+  if (type && type !== "all") {
+    where.type = type.toUpperCase()
+  }
+
+  if (active === "active") {
+    where.isActive = true
+  } else if (active === "inactive") {
+    where.isActive = false
+  }
 
   const [discounts, total] = await Promise.all([
     prisma.discount.findMany({

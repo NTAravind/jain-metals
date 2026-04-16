@@ -9,8 +9,9 @@ export default async function AdminOrdersPage({
   const params = await searchParams
   const page = Number(params?.page) || 1
   const search = typeof params?.search === "string" ? params.search : undefined
+  const status = typeof params?.status === "string" ? params.status : undefined
 
-  const { orders, pages, total } = await getOrdersPaginated(page, 10, search)
+  const { orders, pages, total } = await getOrdersPaginated(page, 10, search, status)
 
   const serializedOrders = orders.map((order) => ({
     ...order,
@@ -32,6 +33,7 @@ export default async function AdminOrdersPage({
            pageCount={pages}
            currentPage={page}
            totalCount={total}
+           activeStatus={status}
         />
       </div>
     </div>

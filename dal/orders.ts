@@ -22,17 +22,22 @@ export const getAllOrders = cache(async () => {
 export const getOrdersPaginated = cache(async (
   page = 1,
   pageSize = 10,
-  q?: string
+  q?: string,
+  status?: string
 ) => {
-  const where: any = q
-    ? {
-        OR: [
-          { id: { contains: q, mode: "insensitive" } },
-          { user: { name: { contains: q, mode: "insensitive" } } },
-          { user: { phone: { contains: q, mode: "insensitive" } } },
-        ],
-      }
-    : {}
+  const where: any = {}
+
+  if (q) {
+    where.OR = [
+      { id: { contains: q, mode: "insensitive" } },
+      { user: { name: { contains: q, mode: "insensitive" } } },
+      { user: { phone: { contains: q, mode: "insensitive" } } },
+    ]
+  }
+
+  if (status && status !== "all") {
+    where.status = status.toUpperCase()
+  }
 
   const [orders, total] = await Promise.all([
     prisma.order.findMany({

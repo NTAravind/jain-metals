@@ -1,7 +1,9 @@
 "use client"
 
+import { useCallback } from "react"
 import { DataTable, type Column } from "@/components/admin/data-table"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type Customer = {
   id: string
@@ -11,18 +13,38 @@ type Customer = {
   _count: { orders: number }
 }
 
+const ORDERS_OPTIONS = [
+  { value: "all", label: "All Customers" },
+  { value: "with_orders", label: "Has Orders" },
+  { value: "no_orders", label: "No Orders" },
+]
+
 export function CustomersClient({ 
   customers, 
   pageCount, 
   currentPage, 
-  totalCount 
+  totalCount,
+  activeHasOrders,
 }: { 
   customers: Customer[]
   pageCount?: number
   currentPage?: number
   totalCount?: number
+  activeHasOrders?: string
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const handleOrdersChange = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === "all") {
+      params.delete("hasOrders")
+    } else {
+      params.set("hasOrders", value)
+    }
+    params.delete("page")
+    router.push(`/admin/customers?${params.toString()}`)
+  }, [router, searchParams])
 
   const columns: Column<Customer>[] = [
     {
@@ -80,6 +102,18 @@ export function CustomersClient({
           totalCount={totalCount}
           searchPlaceholder="Identify patron by phone..."
           emptyMessage="No patron records archived yet."
+          filterSlot={
+            <Select value={activeHasOrders ?? "all"} onValueChange={handleOrdersChange}>
+              <SelectTrigger className="w-[180px] h-10 rounded-xl border-black/10 bg-white">
+                <SelectValue placeholder="Filter by orders" />
+              </SelectTrigger>
+              <SelectContent>
+                {ORDERS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          }
         />
       </div>
     </div>

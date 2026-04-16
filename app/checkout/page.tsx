@@ -10,10 +10,9 @@ import {
   getDeliveryFeeAction,
   getDefaultAddressAction,
 } from "@/actions/checkout"
+import { validateCouponAction } from "@/actions/coupons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { CartItems } from "@/components/cart-items"
@@ -23,14 +22,10 @@ import {
   CheckCircle2,
   Edit3,
   Loader2,
-  MapPin,
-  Phone,
-  User,
-  Tag,
   Zap,
   ArrowRight,
-  ChevronRight,
-  Calendar
+  X,
+  TicketPercent,
 } from "lucide-react"
 import {
   AlertDialog,
@@ -75,6 +70,13 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [coupon, setCoupon] = useState("")
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string
+    type: "PERCENTAGE" | "FIXED" | "FREE_DELIVERY"
+    value: number
+    discountAmount: number
+  } | null>(null)
   const [mode, setMode] = useState<Mode>("delivery")
   const [step, setStep] = useState<Step>("details")
 
@@ -313,7 +315,7 @@ export default function CheckoutPage() {
           sizeName: i.sizeVariantName ?? undefined,
         })),
         pincode: isPickup ? undefined : form.pincode,
-        couponCode: coupon || undefined,
+        couponCode: appliedCoupon?.code || undefined,
         addressId: savedAddressId ?? undefined,
         isPickup,
         pickupDetails: isPickup ? pickupForm : undefined,
@@ -354,7 +356,57 @@ export default function CheckoutPage() {
     }
   }
 
-  const total = subtotal + (deliveryFee ?? 0)
+  // Calculate discount amount from applied coupon
+  const discountAmount = appliedCoupon
+    ? appliedCoupon.type === "PERCENTAGE"
+      ? Math.round((subtotal * appliedCoupon.value) / 100 * 100) / 100
+      : appliedCoupon.type === "FIXED"
+      ? Math.min(appliedCoupon.value, subtotal)
+      : 0 // FREE_DELIVERY: handled as deliveryFee = 0
+    : 0
+
+  const effectiveDeliveryFee = appliedCoupon?.type === "FREE_DELIVERY" ? 0 : (deliveryFee ?? 0)
+  const total = subtotal - discountAmount + effectiveDeliveryFee
+
+  const handleApplyCoupon = async () => {
+    if (!coupon.trim()) return
+    setCouponLoading(true)
+    try {
+      const result = await validateCouponAction(coupon.trim(), subtotal)
+      if (!result.valid) {
+        toast.error(result.reason)
+        setAppliedCoupon(null)
+        return
+      }
+      const discount = result as { valid: true; code: string | null; type: "PERCENTAGE" | "FIXED" | "FREE_DELIVERY"; value: number }
+      const amt =
+        discount.type === "PERCENTAGE"
+          ? Math.round((subtotal * discount.value) / 100 * 100) / 100
+          : discount.type === "FIXED"
+          ? Math.min(discount.value, subtotal)
+          : 0
+      setAppliedCoupon({
+        code: discount.code ?? coupon.trim().toUpperCase(),
+        type: discount.type,
+        value: discount.value,
+        discountAmount: amt,
+      })
+      toast.success(
+        discount.type === "FREE_DELIVERY"
+          ? "Free delivery coupon applied!"
+          : `Coupon applied — ₹${amt.toLocaleString("en-IN")} off!`
+      )
+    } catch {
+      toast.error("Failed to validate coupon")
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null)
+    setCoupon("")
+  }
 
   return (
     <div className="bg-white min-h-screen white-pattern storefront">
@@ -647,30 +699,74 @@ export default function CheckoutPage() {
                      <CartItems readonly={true} />
                   </div>
 
-                  <div className="space-y-8 pt-8 border-t border-brand-brass/10">
-                     {/* Authentication Code */}
-                      <div className="relative">
-                         <Input 
+                  <div className="space-y-6 pt-8 border-t border-brand-brass/10">
+                     {/* Coupon Code */}
+                      {appliedCoupon ? (
+                        <div className="flex items-center justify-between gap-3 p-3 rounded-sm border border-green-300 bg-green-50">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <TicketPercent className="w-4 h-4 text-green-600 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-green-700 uppercase tracking-[0.15em]">{appliedCoupon.code}</p>
+                              <p className="text-[10px] text-green-600 font-medium mt-0.5">
+                                {appliedCoupon.type === "FREE_DELIVERY"
+                                  ? "Free delivery applied"
+                                  : `−₹${appliedCoupon.discountAmount.toLocaleString("en-IN")} discount`}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={handleRemoveCoupon}
+                            className="text-green-600 hover:text-red-500 transition-colors shrink-0"
+                            aria-label="Remove coupon"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Input
                             value={coupon}
                             onChange={(e) => setCoupon(e.target.value.toUpperCase())}
                             placeholder="Coupon Code"
-                            className="rounded-sm border border-brand-brass/30 focus-visible:ring-1 focus-visible:ring-brand-gold h-14 uppercase tracking-[0.3em] text-xs bg-white font-bold px-4 pr-12"
-                         />
-                         <Tag className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-navy/30 pointer-events-none" />
-                      </div>
+                            className="flex-1 rounded-sm border border-brand-brass/30 focus-visible:ring-1 focus-visible:ring-brand-gold h-12 uppercase tracking-[0.2em] text-xs bg-white font-bold px-4"
+                            onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            disabled={couponLoading || !coupon.trim()}
+                            className="h-12 px-5 rounded-sm bg-brand-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-navy transition-all shrink-0 disabled:opacity-50"
+                          >
+                            {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                          </Button>
+                        </div>
+                      )}
 
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                           <div className="flex justify-between items-center">
                              <span className="text-brand-navy/60 uppercase tracking-[0.2em] font-bold text-xs">Subtotal</span>
                              <span className="font-serif text-brand-navy text-xl">₹{subtotal.toLocaleString("en-IN")}</span>
                           </div>
+                          {discountAmount > 0 && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-green-600 uppercase tracking-[0.2em] font-bold text-xs">Discount</span>
+                              <span className="font-sans text-green-600 font-bold text-sm">−₹{discountAmount.toLocaleString("en-IN")}</span>
+                            </div>
+                          )}
+                          {appliedCoupon?.type === "FREE_DELIVERY" && mode === "delivery" && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-green-600 uppercase tracking-[0.2em] font-bold text-xs">Free Delivery</span>
+                              <span className="font-sans text-green-600 font-bold text-sm">Coupon applied</span>
+                            </div>
+                          )}
                           <div className="flex justify-between items-center">
                              <span className="text-brand-navy/60 uppercase tracking-[0.2em] font-bold text-xs">Delivery</span>
                             <span className="font-sans text-brand-navy font-bold text-sm">
-                               {mode === "pickup" ? "Exclusive (Complimentary)" : 
+                               {mode === "pickup" ? "Free (Pickup)" : 
+                                appliedCoupon?.type === "FREE_DELIVERY" ? <span className="text-green-600">Free (Coupon)</span> :
                                 !deliveryInfo?.serviceable ? "Not Available" :
                                 deliveryFee === null ? "..." : 
-                                deliveryFee === 0 ? "Complimentary" : "₹" + deliveryFee.toLocaleString("en-IN")}
+                                deliveryFee === 0 ? "Free" : "₹" + deliveryFee.toLocaleString("en-IN")}
                             </span>
                          </div>
                          {mode === "delivery" && deliveryInfo?.serviceable && deliveryInfo.city && (

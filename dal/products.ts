@@ -91,16 +91,28 @@ export const getAllProductsAdmin = cache(async () => {
 export const getProductsAdminPaginated = cache(async (
   page = 1,
   pageSize = 10,
-  q?: string
+  q?: string,
+  category?: string,
+  stock?: string
 ) => {
-  const where: any = q
-    ? {
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { sku: { contains: q, mode: "insensitive" } },
-        ],
-      }
-    : {}
+  const where: any = {}
+
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { sku: { contains: q, mode: "insensitive" } },
+    ]
+  }
+
+  if (category && category !== "all") {
+    where.categoryId = category
+  }
+
+  if (stock === "in_stock") {
+    where.stock = { gt: 0 }
+  } else if (stock === "out_of_stock") {
+    where.stock = { lte: 0 }
+  }
 
   const [products, total] = await Promise.all([
     prisma.product.findMany({
@@ -257,4 +269,181 @@ export async function applyCategoryDiscount(categoryId: string, discountPercent:
   }
 
   return { updated: products.length }
+}
+
+// ─────────────────────────── Product Discount Management ─────────────────────────────
+
+export type DiscountApplyType = "PERCENTAGE" | "FIXED" | "EXACT"
+
+/**
+ * Apply a discount to a single product (and all its variants).
+ * - PERCENTAGE: discountedPrice = price * (1 - value/100)
+ * - FIXED:      discountedPrice = price - value
+ * - EXACT:      discountedPrice = value (set directly)
+ */
+export async function applyProductDiscount(
+  productId: string,
+  type: DiscountApplyType,
+  value: number
+) {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: { variants: true },
+  })
+  if (!product) throw new Error("Product not found")
+
+  const computeDiscounted = (basePrice: number) => {
+    if (type === "PERCENTAGE") return Math.round(basePrice * (1 - value / 100) * 100) / 100
+    if (type === "FIXED") return Math.max(0, Math.round((basePrice - value) * 100) / 100)
+    return value // EXACT
+  }
+
+  const productDiscounted = computeDiscounted(Number(product.price))
+
+  const updates: any[] = [
+    prisma.product.update({
+      where: { id: productId },
+      data: { discountedPrice: productDiscounted },
+    }),
+  ]
+
+  for (const variant of product.variants) {
+    const variantBase = Number(variant.price)
+    const discountedPrice = computeDiscounted(variantBase)
+    const discountPercent = type === "PERCENTAGE" ? value
+      : Math.round(((variantBase - discountedPrice) / variantBase) * 100 * 100) / 100
+
+    updates.push(
+      prisma.sizeVariant.update({
+        where: { id: variant.id },
+        data: { discountedPrice, discountPercent },
+      })
+    )
+  }
+
+  await prisma.$transaction(updates)
+  return { updated: 1 }
+}
+
+/**
+ * Apply a discount to all products in a category.
+ */
+export async function applyCategoryDiscountTyped(
+  categoryId: string,
+  type: DiscountApplyType,
+  value: number
+) {
+  const products = await prisma.product.findMany({
+    where: { categoryId },
+    include: { variants: true },
+  })
+
+  const computeDiscounted = (basePrice: number) => {
+    if (type === "PERCENTAGE") return Math.round(basePrice * (1 - value / 100) * 100) / 100
+    if (type === "FIXED") return Math.max(0, Math.round((basePrice - value) * 100) / 100)
+    return value // EXACT
+  }
+
+  const updates: any[] = []
+  for (const product of products) {
+    const productDiscounted = computeDiscounted(Number(product.price))
+    updates.push(
+      prisma.product.update({
+        where: { id: product.id },
+        data: { discountedPrice: productDiscounted },
+      })
+    )
+    for (const variant of product.variants) {
+      const variantBase = Number(variant.price)
+      const discountedPrice = computeDiscounted(variantBase)
+      const discountPercent = type === "PERCENTAGE" ? value
+        : Math.round(((variantBase - discountedPrice) / variantBase) * 100 * 100) / 100
+      updates.push(
+        prisma.sizeVariant.update({
+          where: { id: variant.id },
+          data: { discountedPrice, discountPercent },
+        })
+      )
+    }
+  }
+
+  if (updates.length > 0) await prisma.$transaction(updates)
+  return { updated: products.length }
+}
+
+/**
+ * Remove discount from a single product (set discountedPrice = null, discountPercent = 0).
+ */
+export async function clearProductDiscount(productId: string) {
+  await prisma.product.update({
+    where: { id: productId },
+    data: { discountedPrice: null },
+  })
+  await prisma.sizeVariant.updateMany({
+    where: { productId },
+    data: { discountedPrice: null, discountPercent: 0 },
+  })
+  return { cleared: 1 }
+}
+
+/**
+ * Remove discounts from all products in a category.
+ */
+export async function clearCategoryDiscount(categoryId: string) {
+  const products = await prisma.product.findMany({
+    where: { categoryId },
+    select: { id: true },
+  })
+  const ids = products.map((p) => p.id)
+
+  await prisma.product.updateMany({
+    where: { id: { in: ids } },
+    data: { discountedPrice: null },
+  })
+  await prisma.sizeVariant.updateMany({
+    where: { productId: { in: ids } },
+    data: { discountedPrice: null, discountPercent: 0 },
+  })
+  return { cleared: products.length }
+}
+
+/**
+ * Get all products with their current discount status, paginated.
+ */
+export async function getProductsWithDiscounts(
+  page = 1,
+  pageSize = 10,
+  q?: string,
+  categoryId?: string
+) {
+  const where: any = {}
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { sku: { contains: q, mode: "insensitive" } },
+    ]
+  }
+  if (categoryId && categoryId !== "all") {
+    where.categoryId = categoryId
+  }
+
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: {
+        category: true,
+        variants: { orderBy: { sortOrder: "asc" } },
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { name: "asc" },
+    }),
+    prisma.product.count({ where }),
+  ])
+
+  return {
+    products: products.map(serializeProduct),
+    total,
+    pages: Math.ceil(total / pageSize),
+  }
 }

@@ -19,6 +19,8 @@ import {
   Users,
   List,
   Truck,
+  TicketPercent,
+  PercentCircle,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -28,13 +30,20 @@ const navItems = [
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { label: "Products", href: "/admin/products", icon: Package2 },
   { label: "Categories", href: "/admin/categories", icon: List },
-  { label: "Discounts", href: "/admin/discounts", icon: Tag },
+  { label: "Discounts", href: "/admin/discounts", icon: PercentCircle },
+  { label: "Coupons", href: "/admin/coupons", icon: TicketPercent },
   { label: "Delivery", href: "/admin/delivery", icon: Truck },
   { label: "Customers", href: "/admin/customers", icon: Users },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const isActive = (href: string) => {
+    if (href === "/admin") {
+      return pathname === "/admin"
+    }
+    return pathname === href || pathname.startsWith(href + "/")
+  }
   return (
     <Sidebar className="border-r border-black/5">
       <SidebarHeader className="px-6 py-6 border-b border-black/5 bg-white">
@@ -56,10 +65,7 @@ export function AppSidebar() {
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={
-                    pathname === item.href ||
-                    pathname.startsWith(item.href + "/")
-                  }
+                  isActive={isActive(item.href)}
                   className="h-11 px-4 rounded-lg transition-all duration-200 hover:bg-black/5 data-[active=true]:bg-black data-[active=true]:text-white data-[active=true]:shadow-md group"
                 >
                   <Link href={item.href} className="flex items-center gap-3">

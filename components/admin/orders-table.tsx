@@ -2,7 +2,9 @@
 
 import { DataTable, type Column } from "@/components/admin/data-table"
 import { Badge } from "@/components/ui/badge"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type Order = {
   id: string
@@ -24,18 +26,42 @@ const statusColorMap: Record<string, string> = {
   PENDING: "bg-black/5 text-black/40 border border-black/10 hover:bg-black/10",
 }
 
+const STATUS_OPTIONS = [
+  { value: "all", label: "All Status" },
+  { value: "pending", label: "Pending" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "processing", label: "Processing" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+]
+
 export function OrdersTable({ 
   orders, 
   pageCount, 
   currentPage, 
-  totalCount 
+  totalCount,
+  activeStatus,
 }: { 
   orders: Order[]
   pageCount?: number
   currentPage?: number
   totalCount?: number
+  activeStatus?: string
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const handleStatusChange = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === "all") {
+      params.delete("status")
+    } else {
+      params.set("status", value)
+    }
+    params.delete("page")
+    router.push(`/admin/orders?${params.toString()}`)
+  }, [router, searchParams])
 
   const columns: Column<Order>[] = [
     {
@@ -99,6 +125,20 @@ export function OrdersTable({
       totalCount={totalCount}
       searchPlaceholder="Search by order #..."
       emptyMessage="No orders yet."
+      filterSlot={
+        <Select value={activeStatus ?? "all"} onValueChange={handleStatusChange}>
+          <SelectTrigger className="w-[180px] h-10 rounded-xl border-black/10 bg-white">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      }
     />
   )
 }
