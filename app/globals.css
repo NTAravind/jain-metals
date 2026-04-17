@@ -1,9 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 
+html,
+:root {
+  color-scheme: light;
+}
 
 
-html, :root {
+/* Hard-block dark mode — ignore .dark class entirely */
+.dark {
+  color-scheme: light;
   color-scheme: light !important;
 }
 
@@ -64,7 +70,7 @@ html, :root {
 /* ─── Tailwind @theme registration ───────────────────────────────────────── */
 @theme {
   --variant-dark: (&:where(.dark, .dark *));
-  
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

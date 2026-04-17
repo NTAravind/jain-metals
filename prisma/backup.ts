@@ -15,8 +15,7 @@ async function backup() {
     console.log("📦 Starting DB backup...");
 
     // ─── Fetch all tables ────────────────────────────────────────────────────
-    // Add or remove models here to match your schema
-    const [
+  const [
         users,
         categories,
         products,
