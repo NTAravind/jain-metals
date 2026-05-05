@@ -172,7 +172,7 @@ export default async function HomePage() {
           <div className="relative group overflow-hidden border border-brand-navy/5">
             <img
               src="/images/website 003.webp"
-              className="w-full h-full object-cover aspect-video object-center grayscale hover:grayscale-0 transition-all duration-1000"
+              className="w-full h-full object-cover aspect-video object-center grayscale-0 transition-all duration-1000"
               alt="Industrial Products"
             />
             <div className="absolute inset-0 border-[20px] border-white/5 m-4 pointer-events-none"></div>

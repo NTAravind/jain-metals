@@ -44,10 +44,10 @@ export function CartItems({ readonly = false }: CartItemsProps) {
         return (
           <div
             key={itemId}
-            className="flex gap-3.5 p-3.5 bg-white border border-brand-brass/15 shadow-sm"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-3.5 p-3 sm:p-3.5 bg-white border border-brand-brass/15 shadow-sm"
           >
             {/* ── Thumbnail ── */}
-            <div className="relative w-[80px] h-[80px] shrink-0 bg-[#F7F3EC] border border-brand-brass/10 overflow-hidden">
+            <div className="relative w-full sm:w-[80px] h-[120px] sm:h-[80px] shrink-0 bg-[#F7F3EC] border border-brand-brass/10 overflow-hidden">
               {item.product.images?.[0] ? (
                 <img
                   src={item.product.images[0]}
@@ -65,29 +65,29 @@ export function CartItems({ readonly = false }: CartItemsProps) {
             <div className="flex-1 min-w-0 flex flex-col justify-between">
               <div>
                 {/* Name */}
-                <h4 className="font-serif text-brand-navy text-[17px] leading-snug line-clamp-2 mb-0.5 tracking-wide">
+                <h4 className="font-serif text-brand-navy text-base sm:text-[17px] leading-snug line-clamp-2 mb-0.5 tracking-wide">
                   {item.product.name}
                 </h4>
 
                 {/* Size variant label */}
                 {item.sizeVariantName && (
-                  <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-brand-gold/80 mb-1.5">
+                  <p className="text-[10px] sm:text-[11px] font-semibold tracking-[0.15em] uppercase text-brand-gold/80 mb-1.5">
                     {item.sizeVariantName}
                   </p>
                 )}
 
                 {/* Price */}
-                <div className="flex items-baseline gap-2 mb-3">
-                  <span className="text-brand-brass text-[14px] font-bold tracking-wide">
+                <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2 mb-3">
+                  <span className="text-brand-brass text-sm sm:text-[14px] font-bold tracking-wide">
                     ₹{price.toLocaleString("en-IN")}
                   </span>
                   {originalPrice && (
-                    <span className="text-brand-navy/30 text-[12px] line-through font-serif italic">
+                    <span className="text-brand-navy/30 text-xs sm:text-[12px] line-through font-serif italic">
                       ₹{originalPrice.toLocaleString("en-IN")}
                     </span>
                   )}
                   {nearStock && !readonly && (
-                    <span className="text-[11px] font-bold tracking-[0.08em] uppercase text-amber-700 ml-1.5">
+                    <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.08em] uppercase text-amber-700 ml-1.5">
                       {item.product.stock} left
                     </span>
                   )}
@@ -95,7 +95,7 @@ export function CartItems({ readonly = false }: CartItemsProps) {
               </div>
 
               {!readonly ? (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {/* Qty stepper */}
                   <div className="flex items-center border border-brand-brass/20 bg-[#F7F3EC]">
                     <button
@@ -106,7 +106,7 @@ export function CartItems({ readonly = false }: CartItemsProps) {
                     >
                       <Minus className="w-[10px] h-[10px]" />
                     </button>
-                    <span className="w-8 text-center text-[14px] font-bold text-brand-navy tabular-nums">
+                    <span className="w-8 text-center text-sm sm:text-[14px] font-bold text-brand-navy tabular-nums">
                       {item.quantity}
                     </span>
                     <button
@@ -130,16 +130,16 @@ export function CartItems({ readonly = false }: CartItemsProps) {
                   </button>
 
                   {/* Line total */}
-                  <span className="ml-auto font-serif text-[17px] font-bold text-brand-navy tabular-nums">
+                  <span className="ml-auto font-serif text-base sm:text-[17px] font-bold text-brand-navy tabular-nums">
                     ₹{lineTotal.toLocaleString("en-IN")}
                   </span>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-semibold tracking-[0.12em] uppercase text-brand-navy/40">
+                  <span className="text-[11px] sm:text-[12px] font-semibold tracking-[0.12em] uppercase text-brand-navy/40">
                     Piece Count {item.quantity}
                   </span>
-                  <span className="font-serif text-[17px] font-bold text-brand-navy tabular-nums">
+                  <span className="font-serif text-base sm:text-[17px] font-bold text-brand-navy tabular-nums">
                     ₹{lineTotal.toLocaleString("en-IN")}
                   </span>
                 </div>
