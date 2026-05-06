@@ -70,6 +70,15 @@ export type InternationalDelivery = {
   updatedAt: Date
 }
 
+export type DeliveryQuote = {
+  fee: number
+  serviceable: boolean
+  city?: string
+  state?: string
+  country?: string
+  source?: "pincode" | "state" | "international"
+}
+
 const transformPincode = (p: any): DeliveryPincode => ({
   ...p,
   basePrice: Number(p.basePrice),
@@ -309,6 +318,102 @@ export async function calculateInternationalDeliveryFee(
 
   if (intlResult.freeAboveValue && orderValue >= intlResult.freeAboveValue) return 0
   return Math.ceil(intlResult.basePrice + totalWeightKg * intlResult.pricePerKg)
+}
+
+export async function resolveDeliveryQuote({
+  pincode,
+  state,
+  country = "India",
+  totalWeightKg,
+  orderValue,
+}: {
+  pincode?: string | null
+  state?: string | null
+  country?: string | null
+  totalWeightKg: number
+  orderValue: number
+}): Promise<DeliveryQuote> {
+  const normalizedCountry = country?.trim() || "India"
+  const isIndia = normalizedCountry.toLowerCase() === "india"
+
+  if (!isIndia) {
+    const international = await prisma.internationalDelivery.findFirst({
+      where: {
+        isActive: true,
+        OR: [
+          { country: { equals: normalizedCountry, mode: "insensitive" } },
+          { countryCode: { equals: normalizedCountry, mode: "insensitive" } },
+        ],
+      },
+    })
+
+    if (!international) return { fee: 0, serviceable: false, country: normalizedCountry }
+
+    const delivery = transformInternationalDelivery(international)
+    const fee =
+      delivery.freeAboveValue && orderValue >= delivery.freeAboveValue
+        ? 0
+        : Math.ceil(delivery.basePrice + totalWeightKg * delivery.pricePerKg)
+
+    return {
+      fee,
+      serviceable: true,
+      country: delivery.country,
+      source: "international",
+    }
+  }
+
+  if (pincode && /^\d{6}$/.test(pincode)) {
+    const pincodeResult = await getDeliveryPincodeByPincode(pincode)
+    if (pincodeResult?.isActive) {
+      const fee =
+        pincodeResult.freeAboveValue && orderValue >= pincodeResult.freeAboveValue
+          ? 0
+          : Math.ceil(pincodeResult.basePrice + totalWeightKg * pincodeResult.pricePerKg)
+
+      return {
+        fee,
+        serviceable: true,
+        city: pincodeResult.city,
+        state: pincodeResult.state,
+        country: "India",
+        source: "pincode",
+      }
+    }
+  }
+
+  const normalizedState = state?.trim()
+  if (normalizedState) {
+    const stateResult = await prisma.stateDelivery.findFirst({
+      where: {
+        state: { equals: normalizedState, mode: "insensitive" },
+        isActive: true,
+      },
+    })
+
+    if (stateResult) {
+      const delivery = transformStateDelivery(stateResult)
+      const fee =
+        delivery.freeAboveValue && orderValue >= delivery.freeAboveValue
+          ? 0
+          : Math.ceil(delivery.basePrice + totalWeightKg * delivery.pricePerKg)
+
+      return {
+        fee,
+        serviceable: true,
+        state: delivery.state,
+        country: "India",
+        source: "state",
+      }
+    }
+  }
+
+  return {
+    fee: 0,
+    serviceable: false,
+    state: normalizedState || undefined,
+    country: "India",
+  }
 }
 
 export async function isPincodeServiceable(pincode: string): Promise<boolean> {

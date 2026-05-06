@@ -1,6 +1,7 @@
 "use client"
 
 import { useCartStore } from "@/store/cart"
+import { cn } from "@/lib/utils"
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
 
 interface CartItemsProps {
@@ -44,10 +45,18 @@ export function CartItems({ readonly = false }: CartItemsProps) {
         return (
           <div
             key={itemId}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-3.5 p-3 sm:p-3.5 bg-white border border-brand-brass/15 shadow-sm"
+            className={cn(
+              "flex gap-3 sm:gap-3.5 p-3 sm:p-3.5 bg-white border border-brand-brass/15 shadow-sm",
+              readonly ? "flex-row" : "flex-col sm:flex-row",
+            )}
           >
             {/* ── Thumbnail ── */}
-            <div className="relative w-full sm:w-[80px] h-[120px] sm:h-[80px] shrink-0 bg-[#F7F3EC] border border-brand-brass/10 overflow-hidden">
+            <div
+              className={cn(
+                "relative shrink-0 bg-[#F7F3EC] border border-brand-brass/10 overflow-hidden",
+                readonly ? "w-[72px] sm:w-[80px] h-[72px] sm:h-[80px]" : "w-full sm:w-[80px] h-[120px] sm:h-[80px]",
+              )}
+            >
               {item.product.images?.[0] ? (
                 <img
                   src={item.product.images[0]}
@@ -65,19 +74,19 @@ export function CartItems({ readonly = false }: CartItemsProps) {
             <div className="flex-1 min-w-0 flex flex-col justify-between">
               <div>
                 {/* Name */}
-                <h4 className="font-serif text-brand-navy text-base sm:text-[17px] leading-snug line-clamp-2 mb-0.5 tracking-wide">
+                <h4 className="font-serif text-brand-navy text-sm sm:text-[17px] leading-snug line-clamp-2 mb-0.5 tracking-wide">
                   {item.product.name}
                 </h4>
 
                 {/* Size variant label */}
                 {item.sizeVariantName && (
-                  <p className="text-[10px] sm:text-[11px] font-semibold tracking-[0.15em] uppercase text-brand-gold/80 mb-1.5">
+                  <p className="text-[10px] sm:text-[11px] font-semibold tracking-[0.12em] sm:tracking-[0.15em] uppercase text-brand-gold/80 mb-1.5">
                     {item.sizeVariantName}
                   </p>
                 )}
 
                 {/* Price */}
-                <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2 mb-3">
+                <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                   <span className="text-brand-brass text-sm sm:text-[14px] font-bold tracking-wide">
                     ₹{price.toLocaleString("en-IN")}
                   </span>
@@ -135,8 +144,8 @@ export function CartItems({ readonly = false }: CartItemsProps) {
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] sm:text-[12px] font-semibold tracking-[0.12em] uppercase text-brand-navy/40">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[10px] sm:text-[12px] font-semibold tracking-[0.1em] sm:tracking-[0.12em] uppercase text-brand-navy/40">
                     Piece Count {item.quantity}
                   </span>
                   <span className="font-serif text-base sm:text-[17px] font-bold text-brand-navy tabular-nums">
