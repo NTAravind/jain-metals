@@ -3,7 +3,7 @@ import { auth } from "@/app/auth"
 import { notFound, redirect } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle2, Package, MapPin, CreditCard, ChevronRight, Calendar } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Package, MapPin } from "lucide-react"
 
 export default async function CustomerOrderDetailPage({
   params,
@@ -24,44 +24,44 @@ export default async function CustomerOrderDetailPage({
   return (
     <div className="bg-white min-h-screen">
       {/* Monumental Page Header */}
-      <header className="pt-32 pb-20 px-8 text-center bg-brand-cream/5 border-b border-brand-brass/10">
-        <div className="max-w-5xl mx-auto space-y-8">
-           <Link href="/orders" className="inline-flex items-center gap-4 text-[10px] uppercase tracking-[0.4em] font-bold text-brand-gold hover:gap-6 transition-all duration-700">
+      <header className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-8 text-center bg-brand-cream/5 border-b border-brand-brass/10">
+        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+           <Link href="/orders" className="inline-flex items-center gap-3 sm:gap-4 text-[10px] uppercase tracking-[0.24em] sm:tracking-[0.4em] font-bold text-brand-gold hover:gap-6 transition-all duration-700">
               <ArrowLeft className="w-4 h-4" /> Back to Orders
            </Link>
            
            <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.5em] font-bold text-brand-navy/30">Order Details</span>
-              <h1 className="text-5xl md:text-6xl font-serif text-brand-navy tracking-tighter leading-none">
+              <span className="text-[10px] uppercase tracking-[0.28em] sm:tracking-[0.5em] font-bold text-brand-navy/30">Order Details</span>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif text-brand-navy tracking-normal leading-[0.95]">
                  #{order.orderNumber.slice(-8).toUpperCase()}
               </h1>
            </div>
 
-           <div className="flex justify-center gap-6">
-              <div className="flex items-center gap-3 px-6 py-2 border border-brand-gold/20 bg-brand-gold/5">
+           <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-3 px-4 sm:px-6 py-2 border border-brand-gold/20 bg-brand-gold/5">
                  <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse" />
-                 <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-brand-gold">{order.status}</span>
+                 <span className="text-[10px] uppercase tracking-[0.18em] sm:tracking-[0.3em] font-bold text-brand-gold">{order.status}</span>
               </div>
-              <div className={isPaid ? "flex items-center gap-3 px-6 py-2 border border-brand-navy bg-brand-navy text-white text-[10px] uppercase tracking-[0.3em] font-bold" : "flex items-center gap-3 px-6 py-2 border border-brand-navy/10 bg-white text-brand-navy text-[10px] uppercase tracking-[0.3em] font-bold opacity-40"}>
+              <div className={isPaid ? "flex items-center gap-3 px-4 sm:px-6 py-2 border border-brand-navy bg-brand-navy text-white text-[10px] uppercase tracking-[0.18em] sm:tracking-[0.3em] font-bold" : "flex items-center gap-3 px-4 sm:px-6 py-2 border border-brand-navy/10 bg-white text-brand-navy text-[10px] uppercase tracking-[0.18em] sm:tracking-[0.3em] font-bold opacity-40"}>
                  {order.paymentStatus}
               </div>
            </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-8 py-24 lg:py-32">
-        <div className="grid lg:grid-cols-3 gap-24 xl:gap-32">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-24 lg:py-32">
+        <div className="grid lg:grid-cols-3 gap-10 sm:gap-20 xl:gap-32">
           
           {/* Main Artifact Column */}
-          <div className="lg:col-span-2 space-y-24">
+          <div className="lg:col-span-2 space-y-10 sm:space-y-24 min-w-0">
             {isPaid && (
-               <div className="p-12 border border-brand-gold/20 bg-brand-navy text-white relative overflow-hidden group">
-                 <div className="relative z-10 space-y-6">
-                    <div className="w-12 h-12 border border-white/20 flex items-center justify-center">
+               <div className="p-5 sm:p-12 border border-brand-gold/20 bg-brand-navy text-white relative overflow-hidden group">
+                 <div className="relative z-10 space-y-5 sm:space-y-6">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 border border-white/20 flex items-center justify-center">
                        <CheckCircle2 className="w-6 h-6 text-brand-gold" />
                     </div>
                     <div className="space-y-3">
-                       <h3 className="font-serif text-3xl">Order Confirmed</h3>
+                       <h3 className="font-serif text-2xl sm:text-3xl">Order Confirmed</h3>
                        <p className="text-[13px] text-white/50 max-w-lg leading-relaxed font-sans">
                           Your order has been confirmed and is being prepared. We'll update you once it's shipped.
                        </p>
@@ -73,16 +73,16 @@ export default async function CustomerOrderDetailPage({
                </div>
              )}
 
-             <section className="space-y-12">
-                <div className="flex items-center gap-6 border-b border-brand-brass/10 pb-8">
-                   <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-brand-gold">Items</span>
-                   <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-brand-navy/20">{order.items.length} Products</p>
+             <section className="space-y-5 sm:space-y-12">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6 border-b border-brand-brass/10 pb-5 sm:pb-8">
+                   <span className="text-[10px] uppercase tracking-[0.24em] sm:tracking-[0.4em] font-bold text-brand-gold">Items</span>
+                   <p className="text-[10px] uppercase tracking-[0.18em] sm:tracking-[0.3em] font-bold text-brand-navy/20">{order.items.length} Products</p>
                 </div>
                
               <div className="space-y-0">
                 {order.items.map((item: any) => (
-                  <div key={item.id} className="flex items-center gap-12 py-12 border-b border-brand-brass/5 group last:border-0 hover:bg-brand-cream/[0.01] transition-all px-4">
-                    <div className="w-32 h-32 bg-brand-cream/5 border border-brand-brass/10 overflow-hidden flex-shrink-0 relative group">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 lg:gap-12 py-6 sm:py-12 border-b border-brand-brass/5 group last:border-0 hover:bg-brand-cream/[0.01] transition-all px-0 sm:px-4">
+                    <div className="w-full sm:w-28 lg:w-32 h-40 sm:h-28 lg:h-32 bg-brand-cream/5 border border-brand-brass/10 overflow-hidden flex-shrink-0 relative group">
                       {item.product?.images?.[0] ? (
                         <img
                           src={item.product.images[0]}
@@ -95,22 +95,22 @@ export default async function CustomerOrderDetailPage({
                       <div className="absolute inset-0 bg-brand-navy/0 group-hover:bg-brand-navy/5 transition-colors" />
                     </div>
                     
-                    <div className="flex-1 space-y-2">
-                       <span className="text-[9px] uppercase tracking-[0.4em] font-bold text-brand-gold opacity-60">Product</span>
-                       <h3 className="font-serif text-2xl text-brand-navy tracking-tight">{item.product?.name ?? "Product"}</h3>
-                       <div className="flex items-center gap-6 pt-2">
+                    <div className="flex-1 min-w-0 space-y-2">
+                       <span className="text-[9px] uppercase tracking-[0.28em] sm:tracking-[0.4em] font-bold text-brand-gold opacity-60">Product</span>
+                       <h3 className="font-serif text-xl sm:text-2xl text-brand-navy tracking-tight leading-tight">{item.product?.name ?? "Product"}</h3>
+                       <div className="flex flex-wrap items-center gap-3 sm:gap-6 pt-2">
                           <p className="text-[10px] uppercase tracking-widest text-brand-navy/40 font-bold">
                             Quantity: {item.quantity}
                           </p>
-                          <div className="w-1 h-1 rounded-full bg-brand-gold/30" />
+                          <div className="hidden sm:block w-1 h-1 rounded-full bg-brand-gold/30" />
                           <p className="text-[10px] uppercase tracking-widest text-brand-navy/40 font-bold">
                              Status: Active
                           </p>
                        </div>
                     </div>
                     
-                    <div className="text-right">
-                       <p className="text-2xl font-serif text-brand-navy leading-none">
+                    <div className="text-left sm:text-right">
+                       <p className="text-xl sm:text-2xl font-serif text-brand-navy leading-none tabular-nums">
                          ₹{(Number(item.unitPrice) * item.quantity).toLocaleString("en-IN")}
                        </p>
                     </div>
@@ -121,33 +121,33 @@ export default async function CustomerOrderDetailPage({
           </div>
 
           {/* Sidebar Column */}
-          <div className="space-y-20">
+          <div className="space-y-8 sm:space-y-20 min-w-0">
             {/* Valuation Module */}
-            <section className="space-y-10 border border-brand-brass/10 p-10 bg-white relative">
-               <div className="absolute -top-3 left-10 bg-white px-4">
-                  <span className="text-[9px] uppercase tracking-[0.5em] font-bold text-brand-gold">Order Summary</span>
+            <section className="space-y-6 sm:space-y-10 border border-brand-brass/10 p-5 sm:p-10 bg-white relative">
+               <div className="absolute -top-3 left-4 sm:left-10 max-w-[calc(100%-2rem)] bg-white px-3 sm:px-4">
+                  <span className="block truncate text-[9px] uppercase tracking-[0.28em] sm:tracking-[0.5em] font-bold text-brand-gold">Order Summary</span>
                </div>
                
-               <div className="space-y-6 pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] uppercase tracking-[0.4em] font-bold text-brand-navy/20">Subtotal</span>
-                    <span className="font-serif text-brand-navy text-lg">₹{Number(order.subtotal).toLocaleString("en-IN")}</span>
+               <div className="space-y-5 sm:space-y-6 pt-4">
+                  <div className="flex justify-between items-center gap-4">
+                    <span className="text-[9px] uppercase tracking-[0.24em] sm:tracking-[0.4em] font-bold text-brand-navy/20">Subtotal</span>
+                    <span className="font-serif text-brand-navy text-base sm:text-lg text-right tabular-nums">₹{Number(order.subtotal).toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] uppercase tracking-[0.4em] font-bold text-brand-navy/20">Delivery</span>
-                    <span className="font-sans text-brand-navy font-bold text-sm">₹{Number(order.deliveryFee).toLocaleString("en-IN")}</span>
+                  <div className="flex justify-between items-center gap-4">
+                    <span className="text-[9px] uppercase tracking-[0.24em] sm:tracking-[0.4em] font-bold text-brand-navy/20">Delivery</span>
+                    <span className="font-sans text-brand-navy font-bold text-sm text-right tabular-nums">₹{Number(order.deliveryFee).toLocaleString("en-IN")}</span>
                   </div>
                   {Number(order.discountAmount) > 0 && (
-                    <div className="flex justify-between items-center text-brand-gold">
-                      <span className="text-[9px] uppercase tracking-[0.4em] font-bold">Discount</span>
-                      <span className="font-bold">−₹{Number(order.discountAmount).toLocaleString("en-IN")}</span>
+                    <div className="flex justify-between items-center gap-4 text-brand-gold">
+                      <span className="text-[9px] uppercase tracking-[0.24em] sm:tracking-[0.4em] font-bold">Discount</span>
+                      <span className="font-bold text-right tabular-nums">−₹{Number(order.discountAmount).toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   
-                  <div className="pt-10 border-t border-brand-navy bg-brand-navy/[0.03] -mx-10 px-10 pb-10 space-y-4">
-                     <div className="flex justify-between items-end">
-                        <span className="text-[9px] uppercase tracking-[0.5em] font-bold text-brand-navy">Total</span>
-                        <span className="text-4xl font-sans font-bold text-brand-navy tracking-tight leading-none">₹{Number(order.total).toLocaleString("en-IN")}</span>
+                  <div className="pt-6 sm:pt-10 border-t border-brand-navy bg-brand-navy/[0.03] -mx-5 sm:-mx-10 px-5 sm:px-10 pb-6 sm:pb-10 space-y-4">
+                     <div className="flex justify-between items-end gap-4">
+                        <span className="text-[9px] uppercase tracking-[0.3em] sm:tracking-[0.5em] font-bold text-brand-navy">Total</span>
+                        <span className="text-3xl sm:text-4xl font-sans font-bold text-brand-navy tracking-tight leading-none text-right tabular-nums">₹{Number(order.total).toLocaleString("en-IN")}</span>
                      </div>
                      <p className="text-[10px] text-center text-brand-navy/30 leading-relaxed pt-2">
                         Quality products since 1964.
@@ -157,24 +157,24 @@ export default async function CustomerOrderDetailPage({
             </section>
 
             {/* Destination Module */}
-            <section className="space-y-10 border border-brand-brass/10 p-10 bg-white relative">
-               <div className="absolute -top-3 left-10 bg-white px-4">
-                  <span className="text-[9px] uppercase tracking-[0.5em] font-bold text-brand-gold">Delivery Address</span>
+            <section className="space-y-6 sm:space-y-10 border border-brand-brass/10 p-5 sm:p-10 bg-white relative">
+               <div className="absolute -top-3 left-4 sm:left-10 max-w-[calc(100%-2rem)] bg-white px-3 sm:px-4">
+                  <span className="block truncate text-[9px] uppercase tracking-[0.28em] sm:tracking-[0.5em] font-bold text-brand-gold">Delivery Address</span>
                </div>
                
-               <div className="space-y-8 pt-4">
-                  <div className="flex items-start gap-6">
-                     <div className="w-12 h-12 bg-brand-cream/10 border border-brand-brass/10 flex items-center justify-center shrink-0">
+               <div className="space-y-6 sm:space-y-8 pt-4">
+                  <div className="flex items-start gap-4 sm:gap-6">
+                     <div className="w-10 sm:w-12 h-10 sm:h-12 bg-brand-cream/10 border border-brand-brass/10 flex items-center justify-center shrink-0">
                         <MapPin className="w-5 h-5 text-brand-gold opacity-60" />
                      </div>
-                     <div className="space-y-2">
-                        <p className="font-serif text-brand-navy text-2xl tracking-tight italic">{order.address.fullName}</p>
-                        <p className="text-[10px] font-bold text-brand-navy/30 uppercase tracking-[0.3em]">{order.address.phone}</p>
+                     <div className="min-w-0 space-y-2">
+                        <p className="font-serif text-brand-navy text-xl sm:text-2xl tracking-tight italic break-words">{order.address.fullName}</p>
+                        <p className="text-[10px] font-bold text-brand-navy/30 uppercase tracking-[0.18em] sm:tracking-[0.3em] break-words">{order.address.phone}</p>
                      </div>
                   </div>
                   
-                   <div className="bg-brand-cream/[0.03] p-8 border border-brand-brass/10 border-dashed space-y-2">
-                      <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-brand-navy/20 mb-4">Address</p>
+                   <div className="bg-brand-cream/[0.03] p-4 sm:p-8 border border-brand-brass/10 border-dashed space-y-2">
+                      <p className="text-[9px] uppercase tracking-[0.24em] sm:tracking-[0.4em] font-bold text-brand-navy/20 mb-4">Address</p>
                       <div className="text-[13px] text-brand-navy/60 leading-relaxed font-sans space-y-1">
                          <p>{order.address.line1}</p>
                          {order.address.line2 && <p>{order.address.line2}</p>}
@@ -185,8 +185,8 @@ export default async function CustomerOrderDetailPage({
              </section>
 
              {/* Authentication Badge */}
-             <div className="text-center space-y-6 pt-10 border-t border-brand-brass/10">
-                <div className="flex items-center justify-center gap-4 text-[9px] text-brand-navy/30 uppercase tracking-[0.4em] font-bold">
+             <div className="text-center space-y-6 pt-8 sm:pt-10 border-t border-brand-brass/10">
+                <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-[9px] text-brand-navy/30 uppercase tracking-[0.24em] sm:tracking-[0.4em] font-bold">
                    <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold" />
                    <span>Jain Metals Since 1964</span>
                 </div>
