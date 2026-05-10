@@ -1,4 +1,4 @@
-// app/api/orders/complete/route.ts
+
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
@@ -114,7 +114,7 @@ async function SendWhatsappmsg(phone: string, orderid: string): Promise<{ succes
           to: `+91${cleanPhone}`, // Use cleaned phone number
           type: 'template',
           template: {
-            name: 'trackingorder',
+            name: 'tracking',
             language: { code: 'en' },
             components: [
               {

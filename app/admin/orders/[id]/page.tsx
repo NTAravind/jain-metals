@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { OrderStatusForm } from "@/components/admin/order-status-form"
-import { SendMessageButton } from "@/components/admin/send-message-button"
+import { MarkShippedButton } from "@/components/admin/mark-shipped-button"
 import {
   Table,
   TableBody,
@@ -150,7 +150,11 @@ export default async function AdminOrderDetailPage({
           orderId={order.id}
           currentStatus={order.status}
         />
-        <SendMessageButton orderId={order.id} />
+        <MarkShippedButton
+          orderId={order.id}
+          phone={order.user.phone ?? ""}
+          isShipped={order.status === "SHIPPED"}
+        />
       </div>
     </div>
   )

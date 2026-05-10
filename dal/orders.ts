@@ -53,7 +53,19 @@ export const getOrdersPaginated = cache(async (
 })
 
 export const getOrderById = cache(async (id: string) => {
-  return prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE })
+  const order = await prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE })
+  if (!order) return null
+  return {
+    ...order,
+    subtotal: Number(order.subtotal),
+    deliveryFee: Number(order.deliveryFee),
+    discountAmount: Number(order.discountAmount),
+    total: Number(order.total),
+    items: order.items.map((item) => ({
+      ...item,
+      unitPrice: Number(item.unitPrice),
+    })),
+  } as any
 })
 
 export const getOrdersByUser = cache(async (userId: string) => {

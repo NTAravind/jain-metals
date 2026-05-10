@@ -7,6 +7,7 @@ import { resolveDeliveryQuote } from "@/dal/delivery"
 import Razorpay from "razorpay"
 import { z } from "zod"
 import crypto from "crypto"
+import { nanoid } from "nanoid"
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID!,
@@ -223,18 +224,19 @@ export async function createRazorpayOrder(
 
     const total = Math.max(0, subtotal + deliveryFee - discountAmount)
 
-    const rzpOrder = await razorpay.orders.create({
-      amount: Math.round(total * 100),
-      currency: "INR",
-      receipt: `order_${Date.now()}`,
-      notes: { userId: user.id, phone: phone ?? "" },
-    })
+const rzpOrder = await razorpay.orders.create({
+    amount: Math.round(total * 100),
+    currency: "INR",
+    receipt: `jm_${Date.now()}`,
+    notes: { userId: user.id, phone: phone ?? "" },
+  })
 
-    const order = await prisma.order.create({
-      data: {
-        userId: user.id,
-        addressId: finalAddressId!,
-        discountId,
+  const order = await prisma.order.create({
+    data: {
+      userId: user.id,
+      addressId: finalAddressId!,
+      orderNumber: `ORD-${nanoid(8).toUpperCase()}`,
+      discountId,
         subtotal,
         deliveryFee,
         discountAmount,
