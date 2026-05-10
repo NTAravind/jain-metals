@@ -254,8 +254,8 @@ export async function createRazorpayOrder(
     },
   })
 
-  if (isPickup) {
-    await prisma.address.delete({ where: { id: dummyAddr.id } })
+  if (isPickup && finalAddressId) {
+    await prisma.address.delete({ where: { id: finalAddressId } })
   }
 
   return {
