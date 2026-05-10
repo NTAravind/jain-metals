@@ -68,29 +68,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 2. TRUST STRIP */}
-      <section className="bg-brand-navy py-24 relative overflow-hidden">
-        <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-16 relative z-10">
-          {[
-            { icon: Truck, title: "Fast Delivery", desc: "Reliable shipping across India with industrial-grade packaging." },
-            { icon: ShieldCheck, title: "Quality Assured", desc: "Every piece undergoes rigorous inspection before dispatch." },
-            { icon: Box, title: "Best Prices", desc: "Transparent pricing directly from our manufacturing unit." },
-            { icon: Trophy, title: "Since 1964", desc: "Half a century of metallurgical excellence and trust." },
-          ].map((f) => (
-            <div key={f.title} className="space-y-6 group">
-              <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:bg-white/10 group-hover:scale-110">
-                <f.icon className="w-5 h-5 text-white/70" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-bold text-[11px] uppercase tracking-[0.2em] text-white">{f.title}</h3>
-                <p className="text-[13px] text-white/50 leading-relaxed font-sans">{f.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 3. COLLECTION */}
       <section className="section-white py-32 bg-white">
         <div className="max-w-[1440px] mx-auto px-8 md:px-12">
           <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
@@ -119,6 +96,30 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      {/* 2. TRUST STRIP */}
+      <section className="bg-brand-navy py-24 relative overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-16 relative z-10">
+          {[
+            { icon: Truck, title: "Fast Delivery", desc: "Reliable shipping across India with industrial-grade packaging." },
+            { icon: ShieldCheck, title: "Quality Assured", desc: "Every piece undergoes rigorous inspection before dispatch." },
+            { icon: Box, title: "Best Prices", desc: "Transparent pricing directly from our manufacturing unit." },
+            { icon: Trophy, title: "Since 1964", desc: "Half a century of metallurgical excellence and trust." },
+          ].map((f) => (
+            <div key={f.title} className="space-y-6 group">
+              <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:bg-white/10 group-hover:scale-110">
+                <f.icon className="w-5 h-5 text-white/70" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-bold text-[11px] uppercase tracking-[0.2em] text-white">{f.title}</h3>
+                <p className="text-[13px] text-white/50 leading-relaxed font-sans">{f.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. COLLECTION */}
+
 
       {/* 4. HERITAGE */}
       <section className="bg-brand-navy py-40 relative overflow-hidden border-y border-white/5">
