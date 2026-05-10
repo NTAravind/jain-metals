@@ -48,20 +48,27 @@ const CheckoutSchema = z.object({
 // ── Create delivery address ───────────────────────────────────────────────────
 
 export async function createAddressAction(formData: FormData) {
-  const user = await requireCustomer()
-  const data = AddressSchema.parse(Object.fromEntries(formData))
-  
-  const address = await prisma.address.create({
-    data: { ...data, userId: user.id, isDefault: true },
-  })
-  
-  // Unset previous defaults
-  await prisma.address.updateMany({
-    where: { userId: user.id, id: { not: address.id } },
-    data: { isDefault: false },
-  })
+  try {
+    const user = await requireCustomer()
+    const data = AddressSchema.parse(Object.fromEntries(formData))
 
-  return { success: true as const, addressId: address.id }
+    const address = await prisma.address.create({
+      data: { ...data, userId: user.id, isDefault: true },
+    })
+
+    // Unset previous defaults
+    await prisma.address.updateMany({
+      where: { userId: user.id, id: { not: address.id } },
+      data: { isDefault: false },
+    })
+
+    return { success: true as const, addressId: address.id }
+  } catch (e: any) {
+    if (e instanceof z.ZodError) {
+      return { error: e.issues[0].message }
+    }
+    return { error: e.message || "Failed to save address" }
+  }
 }
 
 export async function getDefaultAddressAction() {
@@ -94,180 +101,180 @@ export async function getDeliveryFeeAction(
 export async function createRazorpayOrder(
   input: z.infer<typeof CheckoutSchema>,
 ) {
-  const user = await requireCustomer()
-  const { items, pincode, couponCode, addressId, isPickup, pickupDetails } = CheckoutSchema.parse(input)
+  try {
+    const user = await requireCustomer()
+    const { items, pincode, couponCode, addressId, isPickup, pickupDetails } = CheckoutSchema.parse(input)
 
-  const phone = user.phone
+    const phone = user.phone
 
-  let finalAddressId = addressId
+    let finalAddressId = addressId
 
-  if (isPickup) {
-    if (!pickupDetails) throw new Error("Pickup details required")
-    const dummyAddr = await prisma.address.create({
+    if (isPickup) {
+      if (!pickupDetails) throw new Error("Pickup details required")
+      const dummyAddr = await prisma.address.create({
+        data: {
+          userId: user.id,
+          fullName: pickupDetails.fullName,
+          phone: pickupDetails.phone,
+          line1: "Store Pickup",
+          city: "Local Store",
+          state: "Local",
+          pincode: "000000",
+          country: "India",
+        }
+      })
+      finalAddressId = dummyAddr.id
+    } else {
+      if (!finalAddressId) throw new Error("Address ID is required for delivery")
+      const address = await prisma.address.findUnique({ where: { id: finalAddressId } })
+      if (!address || address.userId !== user.id) throw new Error("Invalid address")
+    }
+
+    let deliveryAddress:
+      | { pincode: string; state: string; country: string }
+      | null = null
+    if (!isPickup && finalAddressId) {
+      const addr = await prisma.address.findUnique({ where: { id: finalAddressId } })
+      if (addr) {
+        deliveryAddress = {
+          pincode: addr.pincode,
+          state: addr.state,
+          country: addr.country,
+        }
+      }
+    }
+
+    const products = await prisma.product.findMany({
+      where: { id: { in: items.map((i) => i.productId) }, isActive: true },
+      include: { variants: true },
+    })
+
+    // Collect variant data for price & stock lookup
+    const variantMap = new Map<string, any>()
+    for (const p of products) {
+      for (const v of p.variants) {
+        variantMap.set(v.id, v)
+      }
+    }
+
+    for (const item of items) {
+      const product = products.find((v) => v.id === item.productId)
+      if (!product) throw new Error("Product not found")
+      if (item.sizeVariantId) {
+        const variant = variantMap.get(item.sizeVariantId)
+        if (!variant) throw new Error(`Size variant not found`)
+        if (variant.stock < item.quantity)
+          throw new Error(`Only ${variant.stock} of "${product.name} (${variant.name})" in stock`)
+      } else {
+        if (product.stock < item.quantity)
+          throw new Error(`Only ${product.stock} of "${product.name}" in stock`)
+      }
+    }
+
+    const subtotal = items.reduce((sum: number, item) => {
+      const product = products.find((vr) => vr.id === item.productId)!
+      let activePrice: number
+      if (item.sizeVariantId) {
+        const variant = variantMap.get(item.sizeVariantId)!
+        activePrice = variant.discountedPrice ? Number(variant.discountedPrice) : Number(variant.price)
+      } else {
+        activePrice = product.discountedPrice ? Number(product.discountedPrice) : Number(product.price)
+      }
+      return sum + activePrice * item.quantity
+    }, 0)
+
+    const totalWeightKg = items.reduce((sum: number, item) => {
+      const vr = products.find((v) => v.id === item.productId)!
+      return sum + (vr.weightKg ?? 1) * item.quantity
+    }, 0)
+
+    let deliveryFee = 0
+    if (!isPickup) {
+      const deliveryQuote = await resolveDeliveryQuote({
+        pincode: pincode ?? deliveryAddress?.pincode,
+        state: deliveryAddress?.state,
+        country: deliveryAddress?.country,
+        totalWeightKg,
+        orderValue: subtotal,
+      })
+
+      if (!deliveryQuote.serviceable) {
+        throw new Error("Delivery is not available for this address")
+      }
+
+      deliveryFee = deliveryQuote.fee
+    }
+
+    let discountAmount = 0
+    let discountId: string | undefined
+    if (couponCode) {
+      const result = await validateCoupon(couponCode, subtotal)
+      if (result.valid) {
+        const d = result.discount
+        discountId = d.id
+        if (d.type === "PERCENTAGE") discountAmount = (subtotal * Number(d.value)) / 100
+        else if (d.type === "FIXED") discountAmount = Math.min(Number(d.value), subtotal)
+        else if (d.type === "FREE_DELIVERY") {
+          if (deliveryFee === 0) throw new Error("Delivery is already free — coupon not applicable")
+          discountAmount = deliveryFee
+        }
+      }
+    }
+
+    const total = Math.max(0, subtotal + deliveryFee - discountAmount)
+
+    const rzpOrder = await razorpay.orders.create({
+      amount: Math.round(total * 100),
+      currency: "INR",
+      receipt: `order_${Date.now()}`,
+      notes: { userId: user.id, phone: phone ?? "" },
+    })
+
+    const order = await prisma.order.create({
       data: {
         userId: user.id,
-        fullName: pickupDetails.fullName,
-        phone: pickupDetails.phone,
-        line1: "Store Pickup",
-        city: "Local Store",
-        state: "Local",
-        pincode: "000000",
-        country: "India",
-      }
-    })
-    finalAddressId = dummyAddr.id
-  } else {
-    if (!finalAddressId) throw new Error("Address ID is required for delivery")
-    const address = await prisma.address.findUnique({ where: { id: finalAddressId } })
-    if (!address || address.userId !== user.id) throw new Error("Invalid address")
-  }
-
-  let deliveryAddress:
-    | { pincode: string; state: string; country: string }
-    | null = null
-  if (!isPickup && finalAddressId) {
-    const addr = await prisma.address.findUnique({ where: { id: finalAddressId } })
-    if (addr) {
-      deliveryAddress = {
-        pincode: addr.pincode,
-        state: addr.state,
-        country: addr.country,
-      }
-    }
-  }
-
-  const products = await prisma.product.findMany({
-    where: { id: { in: items.map((i) => i.productId) }, isActive: true },
-    include: { variants: true },
-  })
-
-  // Collect variant data for price & stock lookup
-  const variantMap = new Map<string, any>()
-  for (const p of products) {
-    for (const v of p.variants) {
-      variantMap.set(v.id, v)
-    }
-  }
-
-  for (const item of items) {
-    const product = products.find((v) => v.id === item.productId)
-    if (!product) throw new Error("Product not found")
-    if (item.sizeVariantId) {
-      const variant = variantMap.get(item.sizeVariantId)
-      if (!variant) throw new Error(`Size variant not found`)
-      if (variant.stock < item.quantity)
-        throw new Error(`Only ${variant.stock} of "${product.name} (${variant.name})" in stock`)
-    } else {
-      if (product.stock < item.quantity)
-        throw new Error(`Only ${product.stock} of "${product.name}" in stock`)
-    }
-  }
-
-  const subtotal = items.reduce((sum: number, item) => {
-    const product = products.find((vr) => vr.id === item.productId)!
-    let activePrice: number
-    if (item.sizeVariantId) {
-      const variant = variantMap.get(item.sizeVariantId)!
-      activePrice = variant.discountedPrice ? Number(variant.discountedPrice) : Number(variant.price)
-    } else {
-      activePrice = product.discountedPrice ? Number(product.discountedPrice) : Number(product.price)
-    }
-    return sum + activePrice * item.quantity
-  }, 0)
-
-  const totalWeightKg = items.reduce((sum: number, item) => {
-    const vr = products.find((v) => v.id === item.productId)!
-    return sum + (vr.weightKg ?? 1) * item.quantity
-  }, 0)
-
-  let deliveryFee = 0
-  if (!isPickup) {
-    const deliveryQuote = await resolveDeliveryQuote({
-      pincode: pincode ?? deliveryAddress?.pincode,
-      state: deliveryAddress?.state,
-      country: deliveryAddress?.country,
-      totalWeightKg,
-      orderValue: subtotal,
-    })
-
-    if (!deliveryQuote.serviceable) {
-      throw new Error("Delivery is not available for this address")
-    }
-
-    deliveryFee = deliveryQuote.fee
-  }
-
-  let discountAmount = 0
-  let discountId: string | undefined
-  if (couponCode) {
-    const result = await validateCoupon(couponCode, subtotal)
-    if (result.valid) {
-      const d = result.discount
-      discountId = d.id
-      if (d.type === "PERCENTAGE") discountAmount = (subtotal * Number(d.value)) / 100
-      else if (d.type === "FIXED") discountAmount = Number(d.value)
-      else if (d.type === "FREE_DELIVERY") {
-        if (deliveryFee === 0) throw new Error("Delivery is already free — coupon not applicable")
-        discountAmount = deliveryFee
-      }
-    }
-  }
-
-  const total = Math.max(0, subtotal + deliveryFee - discountAmount)
-
-  const rzpOrder = await razorpay.orders.create({
-    amount: Math.round(total * 100),
-    currency: "INR",
-    receipt: `order_${Date.now()}`,
-    notes: { userId: user.id, phone: phone ?? "" },
-  })
-
-  const order = await prisma.order.create({
-    data: {
-      userId: user.id,
-      addressId: finalAddressId!,
-      discountId,
-      subtotal,
-      deliveryFee,
-      discountAmount,
-      total,
-      razorpayOrderId: rzpOrder.id,
-      items: {
-        create: items.map((item) => {
-          const product = products.find((vr) => vr.id === item.productId)!
-          let unitPrice: number
-          if (item.sizeVariantId) {
-            const variant = variantMap.get(item.sizeVariantId)!
-            unitPrice = variant.discountedPrice ? Number(variant.discountedPrice) : Number(variant.price)
-          } else {
-            unitPrice = product.discountedPrice ? Number(product.discountedPrice) : Number(product.price)
-          }
-          return {
-            productId: item.productId,
-            sizeVariantId: item.sizeVariantId || null,
-            sizeName: item.sizeName || null,
-            quantity: item.quantity,
-            unitPrice: unitPrice,
-          }
-        }),
+        addressId: finalAddressId!,
+        discountId,
+        subtotal,
+        deliveryFee,
+        discountAmount,
+        total,
+        razorpayOrderId: rzpOrder.id,
+        items: {
+          create: items.map((item) => {
+            const product = products.find((vr) => vr.id === item.productId)!
+            let unitPrice: number
+            if (item.sizeVariantId) {
+              const variant = variantMap.get(item.sizeVariantId)!
+              unitPrice = variant.discountedPrice ? Number(variant.discountedPrice) : Number(variant.price)
+            } else {
+              unitPrice = product.discountedPrice ? Number(product.discountedPrice) : Number(product.price)
+            }
+            return {
+              productId: item.productId,
+              sizeVariantId: item.sizeVariantId || null,
+              sizeName: item.sizeName || null,
+              quantity: item.quantity,
+              unitPrice: unitPrice,
+            }
+          }),
+        },
       },
-    },
-  })
+    })
 
-  if (isPickup && finalAddressId) {
-    await prisma.address.delete({ where: { id: finalAddressId } })
-  }
-
-  return {
-    orderId: order.id,
-    razorpayOrderId: rzpOrder.id,
-    amount: total,
-    currency: "INR",
-    keyId: process.env.RAZORPAY_KEY_ID!,
-    prefill: {
-      name: user.name ?? "",
-      contact: phone ?? "",
-    },
+    return {
+      orderId: order.id,
+      razorpayOrderId: rzpOrder.id,
+      amount: total,
+      currency: "INR",
+      keyId: process.env.RAZORPAY_KEY_ID!,
+      prefill: {
+        name: user.name ?? "",
+        contact: phone ?? "",
+      },
+    }
+  } catch (e: any) {
+    return { error: e.message || "An unexpected error occurred during checkout" }
   }
 }
 
@@ -279,64 +286,68 @@ export async function verifyPaymentAction(input: {
   razorpayPaymentId: string
   razorpaySignature: string
 }) {
-  const user = await requireCustomer()
-
-  const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-    .update(`${input.razorpayOrderId}|${input.razorpayPaymentId}`)
-    .digest("hex")
-
-  if (expected !== input.razorpaySignature)
-    throw new Error("Payment verification failed")
-
-  const order = await prisma.order.findUnique({
-    where: { id: input.orderId },
-    include: { items: true },
-  })
-  if (!order || order.userId !== user.id) throw new Error("Order not found")
-  if (order.paymentStatus === "PAID") throw new Error("Order already paid")
-
-  if (order.discountId) {
-    const discount = await prisma.discount.findUnique({ where: { id: order.discountId } })
-    if (!discount || !discount.isActive) throw new Error("Coupon is no longer valid")
-    if (discount.maxUses && discount.usedCount >= discount.maxUses)
-      throw new Error("Coupon usage limit reached")
-  }
-
   try {
-    await prisma.$transaction([
-      ...order.items.map((item: { productId: string; sizeVariantId: string | null; quantity: number }) =>
-        item.sizeVariantId
-          ? prisma.sizeVariant.update({
+    const user = await requireCustomer()
+
+    const expected = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .update(`${input.razorpayOrderId}|${input.razorpayPaymentId}`)
+      .digest("hex")
+
+    if (expected !== input.razorpaySignature)
+      throw new Error("Payment verification failed")
+
+    const order = await prisma.order.findUnique({
+      where: { id: input.orderId },
+      include: { items: true },
+    })
+    if (!order || order.userId !== user.id) throw new Error("Order not found")
+    if (order.paymentStatus === "PAID") throw new Error("Order already paid")
+
+    if (order.discountId) {
+      const discount = await prisma.discount.findUnique({ where: { id: order.discountId } })
+      if (!discount || !discount.isActive) throw new Error("Coupon is no longer valid")
+      if (discount.maxUses && discount.usedCount >= discount.maxUses)
+        throw new Error("Coupon usage limit reached")
+    }
+
+    try {
+      await prisma.$transaction([
+        ...order.items.map((item: { productId: string; sizeVariantId: string | null; quantity: number }) =>
+          item.sizeVariantId
+            ? prisma.sizeVariant.update({
               where: { id: item.sizeVariantId },
               data: { stock: { decrement: item.quantity } },
             })
-          : prisma.product.update({
+            : prisma.product.update({
               where: { id: item.productId },
               data: { stock: { decrement: item.quantity } },
             }),
-      ),
-      prisma.order.update({
-        where: { id: input.orderId },
-        data: {
-          paymentStatus: "PAID",
-          status: "CONFIRMED",
-          razorpayPayId: input.razorpayPaymentId,
-        },
-      }),
-      ...(order.discountId
-        ? [
+        ),
+        prisma.order.update({
+          where: { id: input.orderId },
+          data: {
+            paymentStatus: "PAID",
+            status: "CONFIRMED",
+            razorpayPayId: input.razorpayPaymentId,
+          },
+        }),
+        ...(order.discountId
+          ? [
             prisma.discount.update({
               where: { id: order.discountId },
               data: { usedCount: { increment: 1 } },
             }),
           ]
-        : []),
-    ])
-  } catch (e: any) {
-    if (e.code === "P2002") throw new Error("Payment already processed")
-    throw e
-  }
+          : []),
+      ])
+    } catch (e: any) {
+      if (e.code === "P2002") throw new Error("Payment already processed")
+      throw e
+    }
 
-  return { success: true as const, orderId: order.id }
+    return { success: true as const, orderId: order.id }
+  } catch (e: any) {
+    return { error: e.message || "Payment verification failed" }
+  }
 }

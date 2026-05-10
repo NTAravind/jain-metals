@@ -46,7 +46,7 @@ export default function OTPButton({
         setError('')
 
         try {
-            const response = await fetch('/api/message/send-otp', {
+            const response = await fetch('/api/messages/send-otp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
