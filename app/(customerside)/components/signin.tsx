@@ -148,7 +148,7 @@ export function SignIn() {
                                         value={phone}
                                         onChange={handlePhoneChange}
                                         placeholder="123-456-7890"
-                                        className="h-12 sm:h-14 bg-brand-navy/30 border-brand-brass/20 text-brand-cream placeholder:text-brand-cream/20 font-medium text-base sm:text-lg tracking-widest focus:border-brand-gold/50 focus:ring-brand-gold/10 rounded-none transition-all duration-500"
+                                        className="h-12 sm:h-14 bg-brand-white border-brand-brass/20 text-navy placeholder:text-brand-cream/20 font-medium text-base sm:text-lg tracking-widest focus:border-brand-gold/50 focus:ring-brand-gold/10 rounded-none transition-all duration-500"
                                         disabled={otpSent}
                                         required
                                         maxLength={12}

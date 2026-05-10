@@ -68,22 +68,23 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-white py-32 bg-white">
+      {/* 3. COLLECTION */}
+      <section className="py-32 bg-brand-navy blue-texture">
         <div className="max-w-[1440px] mx-auto px-8 md:px-12">
           <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
             <div className="space-y-6">
               <div className="flex items-center gap-4">
-                <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-brand-navy/40">Inventory</span>
-                <div className="w-12 h-[1px] bg-brand-navy/10"></div>
+                <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/40">Inventory</span>
+                <div className="w-12 h-[1px] bg-white/10"></div>
               </div>
-              <h2 className="text-5xl md:text-6xl font-serif text-brand-navy tracking-tighter">Shop Our Collection</h2>
-              <p className="text-brand-navy/50 font-sans max-w-md leading-relaxed text-lg">
+              <h2 className="text-5xl md:text-6xl font-serif text-white tracking-tighter">Shop Our Collection</h2>
+              <p className="text-white/50 font-sans max-w-md leading-relaxed text-lg">
                 Precision-crafted idols and heritage utensils, designed for the discerning collector.
               </p>
             </div>
             <Link
               href="/products"
-              className="group flex items-center gap-4 text-[10px] uppercase tracking-[0.3em] font-bold text-brand-navy hover:opacity-60 transition-all pb-4 border-b border-brand-navy/10"
+              className="group flex items-center gap-4 text-[10px] uppercase tracking-[0.3em] font-bold text-white hover:opacity-60 transition-all pb-4 border-b border-white/10"
             >
               Examine All Records <ArrowRight className="w-4 h-4 group-hover:translate-x-3 transition-transform duration-500" />
             </Link>
@@ -96,8 +97,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
       {/* 2. TRUST STRIP */}
-      <section className="bg-brand-navy py-24 relative overflow-hidden">
+      <section className="bg-white py-24 relative overflow-hidden border-y border-brand-navy/5 white-pattern">
         <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-16 relative z-10">
           {[
             { icon: Truck, title: "Fast Delivery", desc: "Reliable shipping across India with industrial-grade packaging." },
@@ -106,20 +108,17 @@ export default async function HomePage() {
             { icon: Trophy, title: "Since 1964", desc: "Half a century of metallurgical excellence and trust." },
           ].map((f) => (
             <div key={f.title} className="space-y-6 group">
-              <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:bg-white/10 group-hover:scale-110">
-                <f.icon className="w-5 h-5 text-white/70" />
+              <div className="w-12 h-12 bg-brand-navy/5 border border-brand-navy/10 flex items-center justify-center transition-all group-hover:bg-brand-navy/10 group-hover:scale-110">
+                <f.icon className="w-5 h-5 text-brand-navy/70" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-bold text-[11px] uppercase tracking-[0.2em] text-white">{f.title}</h3>
-                <p className="text-[13px] text-white/50 leading-relaxed font-sans">{f.desc}</p>
+                <h3 className="font-bold text-[11px] uppercase tracking-[0.2em] text-brand-navy">{f.title}</h3>
+                <p className="text-[13px] text-brand-navy/50 leading-relaxed font-sans">{f.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
-
-      {/* 3. COLLECTION */}
-
 
       {/* 4. HERITAGE */}
       <section className="bg-brand-navy py-40 relative overflow-hidden border-y border-white/5">
@@ -159,7 +158,6 @@ export default async function HomePage() {
             </div>
             <div className="pt-6">
               <Button asChild size="lg" className="bg-brand-navy text-white hover:bg-brand-surface transition-all duration-500 text-[10px] px-14 h-14 rounded-none uppercase tracking-[0.3em] font-bold shadow-2xl shadow-brand-navy/10 group">
-
                 <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919000000000"}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -180,6 +178,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-    </StorefrontLayout >
+    </StorefrontLayout>
   )
 }

@@ -441,7 +441,7 @@ export default function CheckoutPage() {
               {/* Step 1: Physical Parameters / Identification */}
               <section className={cn(
                 "space-y-5 sm:space-y-10 bg-white border border-brand-brass/15 shadow-sm p-4 sm:p-8 lg:p-10 transition-opacity duration-1000",
-                step === "summary" ? "opacity-40 pointer-events-none" : "opacity-100"
+
               )}>
                 <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                   <span className="text-[11px] sm:text-xs uppercase tracking-[0.22em] sm:tracking-[0.3em] font-bold text-brand-gold">Step 01</span>
