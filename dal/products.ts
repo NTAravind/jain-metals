@@ -25,15 +25,16 @@ export const getProducts = cache(async (
   categorySlug?: string,
   q?: string
 ) => {
+  const searchTerm = q?.trim().toLowerCase()
   const where: any = {
     isActive: true,
     ...(categorySlug ? { category: { slug: categorySlug } } : {}),
-    ...(q && q.trim().length > 0
+    ...(searchTerm
       ? {
           OR: [
-            { name: { contains: q, mode: "insensitive" as const } },
-            { description: { contains: q, mode: "insensitive" as const } },
-            { category: { name: { contains: q, mode: "insensitive" as const } } },
+            { name: { contains: searchTerm, mode: "insensitive" as const } },
+            { description: { contains: searchTerm, mode: "insensitive" as const } },
+            { category: { name: { contains: searchTerm, mode: "insensitive" as const } } },
           ],
         }
       : {}),

@@ -46,7 +46,7 @@ export default function OTPButton({
         setError('')
 
         try {
-            const response = await fetch('/api/send-otp', {
+            const response = await fetch('/api/message/send-otp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,10 +84,10 @@ export default function OTPButton({
                 disabled={loading || (disabled && !success)}
                 className={cn(
                     "w-full h-14 transition-all duration-500 rounded-none text-[11px] font-bold uppercase tracking-[0.25em]",
-                    success 
-                        ? "bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30" 
-                        : error 
-                            ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30" 
+                    success
+                        ? "bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30"
+                        : error
+                            ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
                             : "bg-brand-gold hover:bg-brand-gold-soft text-brand-navy",
                     className
                 )}

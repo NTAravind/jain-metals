@@ -198,7 +198,7 @@ model Order {
   status          OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(PENDING)
   razorpayOrderId String?
-  razorpayPayId   String?
+  razorpayPayId   String?       @unique
   notes           String?       @db.Text
   user            User          @relation(fields: [userId], references: [id])
   address         Address       @relation(fields: [addressId], references: [id])

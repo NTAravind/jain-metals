@@ -151,8 +151,8 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
             </nav>
           </div>
 
-          <div className="flex-1 flex justify-end items-center gap-2 md:gap-8">
-            <div className="w-auto md:w-full max-w-[260px] flex justify-end">
+          <div className="flex-1 min-w-0 flex justify-end items-center gap-2 md:gap-8">
+            <div className="min-w-0 w-auto md:w-full max-w-[260px] flex justify-end">
               <SearchBar />
             </div>
             <CartSidebar>

@@ -14,20 +14,20 @@ export default async function HomePage() {
     <StorefrontLayout>
       {/* 1. HERO */}
       <section className="section-white relative min-h-[95vh] flex items-center overflow-hidden border-b border-brand-navy/5">
-        <div className="max-w-[1440px] mx-auto px-8 md:px-12 w-full grid lg:grid-cols-2 gap-20 items-center relative z-10 pt-32">
+        <div className="max-w-[1440px] mx-auto px-5 md:px-12 w-full grid lg:grid-cols-2 gap-20 items-center relative z-10 pt-24 md:pt-32">
           <div className="space-y-10 animate-in fade-in slide-in-from-left-8 duration-1000">
             <div className="space-y-4">
               <span className="text-xs font-bold uppercase tracking-[0.3em] text-brand-navy flex items-center gap-3">
                 <span className="w-8 h-[1.5px] bg-brand-navy"></span>
                 Trusted Since 1964
               </span>
-              <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-brand-navy leading-[0.95] drop-shadow-sm">
+              <h1 className="text-[2.6rem] md:text-6xl lg:text-8xl font-serif tracking-tighter text-brand-navy leading-[1] md:leading-[0.95] drop-shadow-sm">
                 Handcrafted <br />
                 <span className="italic opacity-60">Metals & Art</span>
               </h1>
             </div>
 
-            <p className="text-lg md:text-xl text-brand-navy/60 max-w-xl font-sans leading-relaxed border-l-2 border-brand-navy/10 pl-8">
+            <p className="text-base md:text-xl text-brand-navy/60 max-w-xl font-sans leading-relaxed border-l-2 border-brand-navy/10 pl-5 md:pl-8">
               Exquisite brass idols, timeless home decor, and heritage copper utensils — orchestrated with precision and delivered with integrity.
             </p>
 
@@ -70,7 +70,7 @@ export default async function HomePage() {
 
       {/* 2. TRUST STRIP */}
       <section className="bg-brand-navy py-24 relative overflow-hidden">
-        <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-16 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-16 relative z-10">
           {[
             { icon: Truck, title: "Fast Delivery", desc: "Reliable shipping across India with industrial-grade packaging." },
             { icon: ShieldCheck, title: "Quality Assured", desc: "Every piece undergoes rigorous inspection before dispatch." },
@@ -126,7 +126,7 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-4xl mx-auto px-8 space-y-12 text-center">
           <div className="space-y-8">
             <span className="text-[10px] uppercase tracking-[0.5em] text-white/40 font-bold">The Heritage</span>
-            <h2 className="text-5xl md:text-7xl font-serif text-white leading-[1.1] tracking-tighter">
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-serif text-white leading-[1.1] tracking-tighter">
               Three Generations <br />
               <span className="italic opacity-60 text-brand-gold">of Integrity</span>
             </h2>
@@ -147,7 +147,7 @@ export default async function HomePage() {
 
       {/* 5. WHATSAPP CONTACT */}
       <section className="section-white py-32 relative overflow-hidden bg-white">
-        <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid lg:grid-cols-2 gap-20 items-center">
+        <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid lg:grid-cols-2 gap-10 lg:gap-20 items-center">
           <div className="space-y-10">
             <div className="space-y-4">
               <h3 className="text-4xl md:text-5xl font-serif text-brand-navy tracking-tighter leading-tight">Professional Consultation<br />Direct Channel</h3>
@@ -157,7 +157,7 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="pt-6">
-              <Button asChild size="lg" className="bg-brand-navy text-white hover:bg-brand-surface transition-all duration-500 text-[10px] px-14 h-18 rounded-none uppercase tracking-[0.3em] font-bold shadow-2xl shadow-brand-navy/10 group">
+              <Button asChild size="lg" className="bg-brand-navy text-white hover:bg-brand-surface transition-all duration-500 text-[10px] px-14 h-14 rounded-none uppercase tracking-[0.3em] font-bold shadow-2xl shadow-brand-navy/10 group">
 
                 <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919000000000"}`}
                   target="_blank"

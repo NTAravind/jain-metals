@@ -206,7 +206,10 @@ export async function createRazorpayOrder(
       discountId = d.id
       if (d.type === "PERCENTAGE") discountAmount = (subtotal * Number(d.value)) / 100
       else if (d.type === "FIXED") discountAmount = Number(d.value)
-      else if (d.type === "FREE_DELIVERY") discountAmount = deliveryFee
+      else if (d.type === "FREE_DELIVERY") {
+        if (deliveryFee === 0) throw new Error("Delivery is already free — coupon not applicable")
+        discountAmount = deliveryFee
+      }
     }
   }
 
@@ -251,6 +254,10 @@ export async function createRazorpayOrder(
     },
   })
 
+  if (isPickup) {
+    await prisma.address.delete({ where: { id: dummyAddr.id } })
+  }
+
   return {
     orderId: order.id,
     razorpayOrderId: rzpOrder.id,
@@ -289,35 +296,47 @@ export async function verifyPaymentAction(input: {
   if (!order || order.userId !== user.id) throw new Error("Order not found")
   if (order.paymentStatus === "PAID") throw new Error("Order already paid")
 
-  await prisma.$transaction([
-    ...order.items.map((item: { productId: string; sizeVariantId: string | null; quantity: number }) =>
-      item.sizeVariantId
-        ? prisma.sizeVariant.update({
-            where: { id: item.sizeVariantId },
-            data: { stock: { decrement: item.quantity } },
-          })
-        : prisma.product.update({
-            where: { id: item.productId },
-            data: { stock: { decrement: item.quantity } },
-          }),
-    ),
-    prisma.order.update({
-      where: { id: input.orderId },
-      data: {
-        paymentStatus: "PAID",
-        status: "CONFIRMED",
-        razorpayPayId: input.razorpayPaymentId,
-      },
-    }),
-    ...(order.discountId
-      ? [
-          prisma.discount.update({
-            where: { id: order.discountId },
-            data: { usedCount: { increment: 1 } },
-          }),
-        ]
-      : []),
-  ])
+  if (order.discountId) {
+    const discount = await prisma.discount.findUnique({ where: { id: order.discountId } })
+    if (!discount || !discount.isActive) throw new Error("Coupon is no longer valid")
+    if (discount.maxUses && discount.usedCount >= discount.maxUses)
+      throw new Error("Coupon usage limit reached")
+  }
+
+  try {
+    await prisma.$transaction([
+      ...order.items.map((item: { productId: string; sizeVariantId: string | null; quantity: number }) =>
+        item.sizeVariantId
+          ? prisma.sizeVariant.update({
+              where: { id: item.sizeVariantId },
+              data: { stock: { decrement: item.quantity } },
+            })
+          : prisma.product.update({
+              where: { id: item.productId },
+              data: { stock: { decrement: item.quantity } },
+            }),
+      ),
+      prisma.order.update({
+        where: { id: input.orderId },
+        data: {
+          paymentStatus: "PAID",
+          status: "CONFIRMED",
+          razorpayPayId: input.razorpayPaymentId,
+        },
+      }),
+      ...(order.discountId
+        ? [
+            prisma.discount.update({
+              where: { id: order.discountId },
+              data: { usedCount: { increment: 1 } },
+            }),
+          ]
+        : []),
+    ])
+  } catch (e: any) {
+    if (e.code === "P2002") throw new Error("Payment already processed")
+    throw e
+  }
 
   return { success: true as const, orderId: order.id }
 }

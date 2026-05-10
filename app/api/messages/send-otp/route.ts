@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { saveOtp } from '../../../lib/otpstore'
+import { saveOtp } from '../../../../lib/otpstore'
 
 // Simple rate limiting with in-memory store
 const rateLimitStore = new Map<string, { attempts: number; resetAt: number }>()
@@ -9,17 +9,17 @@ const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000 // 1 hour
 function checkRateLimit(phone: string): boolean {
   const now = Date.now()
   const entry = rateLimitStore.get(phone)
-  
+
   if (!entry || now > entry.resetAt) {
     // Reset or create new entry
     rateLimitStore.set(phone, { attempts: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
     return true
   }
-  
+
   if (entry.attempts >= MAX_ATTEMPTS) {
     return false // Rate limited
   }
-  
+
   entry.attempts += 1
   return true
 }
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
     }
 
     const whatsappData = await whatsappResponse.json()
-    console.log('OTP sent successfully:', { 
+    console.log('OTP sent successfully:', {
       messageId: whatsappData.messages?.[0]?.id,
       phone: phone,
       timestamp: new Date().toISOString()

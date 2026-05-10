@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 function SearchBarContent() {
   const router = useRouter()
@@ -28,7 +29,7 @@ function SearchBarContent() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const params = new URLSearchParams(searchParams.toString())
-    const trimmed = value.trim()
+    const trimmed = value.trim().toLowerCase()
     if (trimmed) params.set("q", trimmed)
     else params.delete("q")
     params.delete("page")
@@ -48,7 +49,7 @@ function SearchBarContent() {
   }
 
   return (
-    <div className="flex items-center justify-end">
+    <div className={cn("flex min-w-0 items-center justify-end transition-all duration-300", isOpen ? "w-[min(72vw,280px)] sm:w-full" : "w-10")}>
       <AnimatePresence mode="wait">
         {!isOpen ? (
           <motion.button
@@ -58,17 +59,18 @@ function SearchBarContent() {
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => setIsOpen(true)}
             className="p-2 text-brand-navy/60 hover:text-brand-gold transition-colors"
+            aria-label="Open search"
           >
             <Search className="w-5 h-5" />
           </motion.button>
         ) : (
           <motion.form
             key="search-form"
-            initial={{ width: 0, opacity: 0 }}
+            initial={{ opacity: 0, scaleX: 0.92 }}
             animate={{ width: "100%", opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            exit={{ opacity: 0, scaleX: 0.92 }}
             onSubmit={handleSubmit}
-            className="relative flex items-center w-full max-w-[280px]"
+            className="relative flex min-w-0 origin-right items-center w-full max-w-[280px]"
           >
             <Search className="absolute left-3 w-4 h-4 text-brand-navy/30 pointer-events-none" />
             <Input
@@ -76,7 +78,7 @@ function SearchBarContent() {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="Search Archive..."
-              className="pl-9 pr-8 h-10 bg-brand-cream/[0.05] border-brand-brass/20 rounded-sm focus-visible:ring-1 focus-visible:ring-brand-gold/50 text-xs uppercase tracking-[0.2em] font-bold text-brand-navy shadow-sm"
+              className="pl-9 pr-8 h-10 bg-brand-cream/[0.05] border-brand-brass/20 rounded-sm focus-visible:ring-1 focus-visible:ring-brand-gold/50 text-xs uppercase tracking-[0.14em] sm:tracking-[0.2em] font-bold text-brand-navy shadow-sm"
               onBlur={() => {
                 if (!value && !searchParams.get("q")) setIsOpen(false)
               }}
@@ -85,6 +87,7 @@ function SearchBarContent() {
               type="button"
               onClick={handleClear}
               className="absolute right-2 text-brand-navy/30 hover:text-brand-navy"
+              aria-label="Clear search"
             >
               <X className="w-4 h-4" />
             </button>
