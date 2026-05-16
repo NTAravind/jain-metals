@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { ArrowRight, MapPin, Phone, Mail, } from "lucide-react"
+import { WhatsappLogo, MapsLogo } from "@/components/icons"
 
 export function Footer() {
   return (
@@ -22,14 +23,14 @@ export function Footer() {
             Established in 1964. Precision-crafted idols, heritage utensils, and metallurgical excellence. Direct from our manufacturing unit to your doorstep.
           </p>
           <div className="flex gap-6 pt-4">
-            <Link href="#" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all rounded-none opacity-40 hover:opacity-100">
-              <Mail className="w-4 h-4 text-white" />
+            <Link href="mailto:contact@jainmetals.com" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
+              <Mail className="w-4 h-4 text-brand-gold group-hover:text-brand-navy transition-colors" />
             </Link>
-            <Link href="#" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all rounded-none opacity-40 hover:opacity-100">
-              <Mail className="w-4 h-4 text-white" />
+            <Link href={`https://wa.me/${process.env.WHATSAPPCONTACT}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
+              <WhatsappLogo className="w-4 h-4 text-brand-gold group-hover:text-brand-navy transition-colors" />
             </Link>
-            <Link href="#" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all rounded-none opacity-40 hover:opacity-100">
-              <Mail className="w-4 h-4 text-white" />
+            <Link href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
+              <MapsLogo className="w-4 h-4 text-brand-gold group-hover:text-brand-navy transition-colors" />
             </Link>
           </div>
         </div>
