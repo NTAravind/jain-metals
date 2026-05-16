@@ -24,6 +24,6 @@ try {
   const obj = Object.fromEntries(form);
   const data = AddressSchema.parse(obj);
   console.log("Success:", data);
-} catch(e) {
+} catch(e: any) {
   console.log("Error:", e.issues);
 }
