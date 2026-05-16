@@ -82,12 +82,7 @@ export default async function HomePage() {
                 Precision-crafted idols and heritage utensils, designed for the discerning collector.
               </p>
             </div>
-            <Link
-              href="/products"
-              className="group flex items-center gap-4 text-[10px] uppercase tracking-[0.3em] font-bold text-white hover:opacity-60 transition-all pb-4 border-b border-white/10"
-            >
-              Examine All Records <ArrowRight className="w-4 h-4 group-hover:translate-x-3 transition-transform duration-500" />
-            </Link>
+
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-20">
@@ -138,9 +133,7 @@ export default async function HomePage() {
           <div className="flex flex-col items-center gap-8 pt-8">
             <div className="w-24 h-[1.5px] bg-white/10"></div>
             <p className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold">Established 1964</p>
-            <Button asChild variant="outline" className="border-white/10 text-brand-navy hover:bg-white hover:text-brand-gold hover:text-[15px] rounded-none h-14 px-12 transition-all duration-700 uppercase tracking-widest text-[10px]">
-              <Link href="/products">Shop Inventory</Link>
-            </Button>
+
           </div>
         </div>
       </section>
