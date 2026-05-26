@@ -85,6 +85,7 @@ model Product {
   videoUrl        String?
   isActive        Boolean           @default(true)
   category        Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  collections     ProductCollection[]
   discounts       DiscountProduct[]
   orderItems      OrderItem[]
   variants        SizeVariant[]
@@ -112,6 +113,27 @@ model Category {
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model Collection {
+  id              String              @id @default(cuid())
+  name            String              @unique
+  slug            String              @unique
+  description     String?
+  isDefault       Boolean             @default(false)
+  discountPercent Float?              // overrides product discount when set (0-100)
+  products        ProductCollection[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+}
+
+model ProductCollection {
+  productId    String
+  collectionId String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@id([productId, collectionId])
 }
 
 model Discount {

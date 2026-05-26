@@ -21,6 +21,7 @@ import {
   Truck,
   TicketPercent,
   PercentCircle,
+  Layers,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -30,6 +31,7 @@ const navItems = [
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { label: "Products", href: "/admin/products", icon: Package2 },
   { label: "Categories", href: "/admin/categories", icon: List },
+  { label: "Collections", href: "/admin/collections", icon: Layers },
   { label: "Discounts", href: "/admin/discounts", icon: PercentCircle },
   { label: "Coupons", href: "/admin/coupons", icon: TicketPercent },
   { label: "Delivery", href: "/admin/delivery", icon: Truck },

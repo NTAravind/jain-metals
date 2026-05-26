@@ -10,9 +10,10 @@ import { CartSidebar } from "@/components/cart-sidebar"
 import { SearchBar } from "./search-bar"
 import { motion, AnimatePresence, useScroll } from "framer-motion"
 
-export function Navbar({ categories = [] }: { categories: any[] }) {
+export function Navbar({ categories = [], collections = [] }: { categories: any[]; collections: any[] }) {
   const [open, setOpen] = useState(false)
   const [collectionsOpen, setCollectionsOpen] = useState(false)
+  const [otherOpen, setOtherOpen] = useState(false)
   const [mobileShopOpen, setMobileShopOpen] = useState(false)
   const { data: session } = useSession()
   const count = useCartStore((s) => s.items.reduce((a, i) => a + i.quantity, 0))
@@ -139,6 +140,43 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
               >
                 Our Products
               </Link>
+
+              {/* Other collections dropdown */}
+              {collections.length > 0 && (
+                <div
+                  className="relative h-20 flex items-center group cursor-pointer"
+                  onMouseEnter={() => setOtherOpen(true)}
+                  onMouseLeave={() => setOtherOpen(false)}
+                >
+                  <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-black/60 hover:text-black transition-all flex items-center gap-2">
+                    Other <ChevronDown className={`w-3 h-3 transition-transform duration-500 ${otherOpen ? "rotate-180" : ""}`} />
+                  </span>
+
+                  <AnimatePresence>
+                    {otherOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-[calc(100%-1px)] left-0 min-w-[200px] bg-white border border-black/10 shadow-2xl py-4 z-[60]"
+                      >
+                        <p className="text-[9px] uppercase tracking-[0.25em] font-bold text-black/30 px-6 pb-3">Collections</p>
+                        {collections.map((col: any) => (
+                          <Link
+                            key={col.id}
+                            href={`/collections/${col.slug}`}
+                            className="block px-6 py-2.5 text-[11px] font-bold tracking-widest uppercase text-black/60 hover:text-black hover:translate-x-1 transition-all"
+                            onClick={() => setOtherOpen(false)}
+                          >
+                            {col.name}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {session && (
                 <Link
@@ -304,7 +342,7 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
                       <div className="space-y-6">
                         <p className="text-[10px] uppercase tracking-[0.4em] text-brand-gold font-bold opacity-60">By Category</p>
                         <div className="grid grid-cols-1 gap-6">
-                          {categories.map((cat) => (
+                          {categories.map((cat: any) => (
                             <Link
                               key={cat.id}
                               href={`/products?category=${cat.slug}`}
@@ -317,6 +355,25 @@ export function Navbar({ categories = [] }: { categories: any[] }) {
                           ))}
                         </div>
                       </div>
+
+                      {collections.length > 0 && (
+                        <div className="space-y-6 pt-6 border-t border-brand-brass/10">
+                          <p className="text-[10px] uppercase tracking-[0.4em] text-brand-gold font-bold opacity-60">Other Collections</p>
+                          <div className="grid grid-cols-1 gap-6">
+                            {collections.map((col: any) => (
+                              <Link
+                                key={col.id}
+                                href={`/collections/${col.slug}`}
+                                className="text-xl font-serif text-brand-cream/80 hover:text-brand-gold transition-colors flex items-center justify-between"
+                                onClick={closeAll}
+                              >
+                                {col.name}
+                                <ChevronDown className="-rotate-90 w-4 h-4 opacity-30" />
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
