@@ -304,7 +304,11 @@ export async function verifyPaymentAction(input: {
       include: { items: true },
     })
     if (!order || order.userId !== user.id) throw new Error("Order not found")
-    if (order.paymentStatus === "PAID") throw new Error("Order already paid")
+
+    // Webhook already processed this payment — treat as success, not an error
+    if (order.paymentStatus === "PAID") {
+      return { success: true as const, orderId: order.id, alreadyVerified: true }
+    }
 
     if (order.discountId) {
       const discount = await prisma.discount.findUnique({ where: { id: order.discountId } })
@@ -351,5 +355,22 @@ export async function verifyPaymentAction(input: {
     return { success: true as const, orderId: order.id }
   } catch (e: any) {
     return { error: e.message || "Payment verification failed" }
+  }
+}
+
+// ── STEP 2b: Poll order payment status (webhook fallback) ─────────────────────
+// Called by the client when verifyPaymentAction errors, to check if the
+// webhook already confirmed the payment server-side.
+export async function checkOrderPaidAction(orderId: string) {
+  try {
+    const user = await requireCustomer()
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { id: true, userId: true, paymentStatus: true },
+    })
+    if (!order || order.userId !== user.id) return { paid: false }
+    return { paid: order.paymentStatus === "PAID" }
+  } catch {
+    return { paid: false }
   }
 }

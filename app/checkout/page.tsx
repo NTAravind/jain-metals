@@ -6,6 +6,7 @@ import { useCartStore } from "@/store/cart"
 import {
   createRazorpayOrder,
   verifyPaymentAction,
+  checkOrderPaidAction,
   createAddressAction,
   getDeliveryFeeAction,
   getDefaultAddressAction,
@@ -92,6 +93,9 @@ export default function CheckoutPage() {
   const [deliveryFee, setDeliveryFee] = useState<number | null>(null)
   const [deliveryInfo, setDeliveryInfo] = useState<{ serviceable: boolean; city?: string; state?: string } | null>(null)
   const [feeLoading, setFeeLoading] = useState(false)
+
+  // Payment verification loading
+  const [verifyingPayment, setVerifyingPayment] = useState(false)
 
   // Success Modal
   const [successOrder, setSuccessOrder] = useState<string | null>(null)
@@ -336,18 +340,44 @@ export default function CheckoutPage() {
         theme: { color: "#0D1235" },
         handler: async (response: any) => {
           if (paymentCancelled) return
-          const result = await verifyPaymentAction({
-            orderId: orderData.orderId,
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-          })
-          if ("error" in result) {
-            toast.error("Payment verification failed")
-            return
+
+          // Show verification overlay immediately
+          setVerifyingPayment(true)
+          setLoading(false)
+
+          try {
+            // Step 1: Verify HMAC signature + write to DB atomically
+            const result = await verifyPaymentAction({
+              orderId: orderData.orderId,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            })
+
+            if ("success" in result) {
+              // Both signature + DB confirmed ✅
+              clearCart()
+              setSuccessOrder(orderData.orderId)
+              return
+            }
+
+            // Step 2 (fallback): Signature check may have failed due to a network
+            // hiccup. Wait for the Razorpay webhook to confirm server-side.
+            await new Promise((r) => setTimeout(r, 3000))
+            const { paid } = await checkOrderPaidAction(orderData.orderId)
+
+            if (paid) {
+              // Webhook confirmed payment ✅
+              clearCart()
+              setSuccessOrder(orderData.orderId)
+              return
+            }
+
+            // Both checks failed — genuine error
+            toast.error("Payment verification failed. If money was deducted, please contact support with your order details.")
+          } finally {
+            setVerifyingPayment(false)
           }
-          clearCart()
-          setSuccessOrder(orderData.orderId)
         },
         modal: {
           ondismiss: () => {
@@ -820,10 +850,10 @@ export default function CheckoutPage() {
                       if (step === "details") void handleSaveAddress()
                       else void handleCheckout(e)
                     }}
-                    disabled={step === "details" ? saving : loading}
+                    disabled={step === "details" ? saving : (loading || verifyingPayment)}
                     className="ml-auto h-12 flex-1 rounded-sm bg-brand-gold px-4 text-brand-navy hover:bg-brand-navy hover:text-white text-[11px] font-bold uppercase tracking-[0.18em] shadow-lg disabled:opacity-50"
                   >
-                    {(step === "details" ? saving : loading) ? (
+                    {(step === "details" ? saving : (loading || verifyingPayment)) ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : step === "details" ? (
                       "Continue"
@@ -834,6 +864,44 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+
+              {/* Payment Verification Loading Overlay */}
+              {verifyingPayment && (
+                <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-md">
+                  <div className="flex flex-col items-center gap-10 text-center px-8">
+                    {/* Animated ring */}
+                    <div className="relative w-28 h-28 flex items-center justify-center">
+                      <div className="absolute inset-0 rounded-full border-2 border-brand-gold/20" />
+                      <div className="absolute inset-0 rounded-full border-t-2 border-brand-gold animate-spin" />
+                      <div className="absolute inset-2 rounded-full border border-brand-brass/10" />
+                      <Zap className="w-10 h-10 text-brand-gold" />
+                    </div>
+
+                    <div className="space-y-3">
+                      <p className="text-xs uppercase tracking-[0.4em] font-bold text-brand-gold">
+                        Confirming Payment
+                      </p>
+                      <p className="text-3xl font-serif text-brand-navy leading-tight">
+                        Securing your order…
+                      </p>
+                      <p className="text-sm text-brand-navy/50 font-sans max-w-xs leading-relaxed">
+                        Verifying with Razorpay and confirming your transaction. Please do not close this page.
+                      </p>
+                    </div>
+
+                    {/* Animated dots */}
+                    <div className="flex items-center gap-2">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="w-2 h-2 rounded-full bg-brand-gold animate-bounce"
+                          style={{ animationDelay: `${i * 0.15}s` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Success Modal: The Achievement of Acquisition */}
               <AlertDialog open={!!successOrder} onOpenChange={(open) => {
