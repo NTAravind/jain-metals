@@ -190,9 +190,7 @@ export function Navbar({ categories = [], collections = [] }: { categories: any[
           </div>
 
           <div className="flex-1 min-w-0 flex justify-end items-center gap-2 md:gap-8">
-            <div className="min-w-0 w-auto md:w-full max-w-[260px] flex justify-end">
-              <SearchBar />
-            </div>
+            <SearchBar />
             <CartSidebar>
               <Button variant="ghost" className="relative h-12 w-12 p-0 hover:bg-black/5 rounded-xl group border border-black/10 transition-all">
                 <ShoppingCart className="w-5 h-5 text-black/60 group-hover:text-black transition-colors" />
