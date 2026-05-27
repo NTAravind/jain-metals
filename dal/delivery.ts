@@ -279,17 +279,16 @@ export async function calculateDeliveryFee(
   totalWeightKg: number,
   orderValue: number,
 ): Promise<number> {
-  // First try pincode-level pricing
+  // Direct DB query — no cache, always fresh
   if (/^\d{6}$/.test(pincode)) {
-    const pincodeResult = await getDeliveryPincodeByPincode(pincode)
+    const pincodeResult = await prisma.deliveryPincode.findUnique({ where: { pincode } })
     if (pincodeResult && pincodeResult.isActive) {
-      if (pincodeResult.freeAboveValue && orderValue >= pincodeResult.freeAboveValue) return 0
-      return Math.ceil(pincodeResult.basePrice + totalWeightKg * pincodeResult.pricePerKg)
+      const p = transformPincode(pincodeResult)
+      if (p.freeAboveValue && orderValue >= p.freeAboveValue) return 0
+      return Math.ceil(p.basePrice + totalWeightKg * p.pricePerKg)
     }
   }
-
-  // Fall back to state-level pricing using the state from address
-  return 0 // State is passed separately in checkout, handled in checkout action
+  return 0
 }
 
 export async function calculateDeliveryFeeByState(
@@ -363,9 +362,11 @@ export async function resolveDeliveryQuote({
     }
   }
 
+  // ── Pincode lookup: always direct DB, never cached ──
   if (pincode && /^\d{6}$/.test(pincode)) {
-    const pincodeResult = await getDeliveryPincodeByPincode(pincode)
-    if (pincodeResult?.isActive) {
+    const raw = await prisma.deliveryPincode.findUnique({ where: { pincode } })
+    if (raw?.isActive) {
+      const pincodeResult = transformPincode(raw)
       const fee =
         pincodeResult.freeAboveValue && orderValue >= pincodeResult.freeAboveValue
           ? 0
@@ -382,6 +383,7 @@ export async function resolveDeliveryQuote({
     }
   }
 
+  // ── State lookup: always direct DB, never cached ──
   const normalizedState = state?.trim()
   if (normalizedState) {
     const stateResult = await prisma.stateDelivery.findFirst({
