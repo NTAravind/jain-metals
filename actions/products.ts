@@ -17,16 +17,22 @@ const VariantSchema = z.object({
   sortOrder: z.coerce.number().int().default(0),
 })
 
+// Coerce an optional numeric field: empty string / "0" / 0 → undefined
+const optionalPositiveNumber = z.preprocess(
+  (v) => (v === "" || v === "0" || v === 0 || v == null ? undefined : v),
+  z.coerce.number().positive().optional()
+)
+
 const ProductSchema = z.object({
   name: z.string().min(2),
   description: z.string().min(10),
   categoryId: z.string().optional(),
   style: z.string().optional(),
   price: z.coerce.number().positive(),
-  discountedPrice: z.coerce.number().positive().optional(),
+  discountedPrice: optionalPositiveNumber,
   stock: z.coerce.number().int().min(0),
-  weightKg: z.coerce.number().positive().optional(),
-  heightCm: z.coerce.number().positive().optional(),
+  weightKg: optionalPositiveNumber,
+  heightCm: optionalPositiveNumber,
   images: z.array(z.string().url()).min(1, "At least one image is required"),
   videoUrl: z.string().url().optional().or(z.literal("")),
   isActive: z.boolean().default(true),
