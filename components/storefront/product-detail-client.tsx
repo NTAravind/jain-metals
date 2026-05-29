@@ -334,21 +334,108 @@ export function ProductDetailClient({ product }: { product: any }) {
                </p>
             </div>
 
-            <div className="lg:col-span-2 grid md:grid-cols-2 gap-10">
-               {[
-                 { label: "Material", value: product.material || "Brass", detail: "Quality crafted." },
-                 { label: "Weight", value: `${product.weightKg || 'N/A'} kg`, detail: "As listed." },
-                 { label: "Height", value: `${product.heightCm || 'N/A'} cm`, detail: "Standing height." },
-                 { label: "Availability", value: currentStock > 0 ? "In Stock" : "Out of Stock", detail: currentStock > 0 ? `${currentStock} available` : "Contact us" }
-               ].map((spec) => (
-                 <div key={spec.label} className="card-premium-dark p-10 space-y-6 group">
-                    <div className="space-y-1">
-                       <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-brand-gold opacity-60">{spec.label}</p>
-                       <p className="text-2xl font-serif text-brand-white group-hover:text-brand-gold transition-colors">{spec.value}</p>
-                    </div>
-                    <p className="text-[11px] text-brand-cream/30 uppercase tracking-[0.4em] font-bold">{spec.detail}</p>
+            <div className="lg:col-span-2 space-y-10">
+               {/* Base product specs — always shown */}
+               <div className="grid md:grid-cols-2 gap-10">
+                 {[
+                   { label: "Material", value: product.material || "Brass", detail: "Quality crafted." },
+                   { label: "Weight", value: product.weightKg ? `${product.weightKg} kg` : "N/A", detail: "As listed." },
+                   { label: "Height", value: product.heightCm ? `${product.heightCm} cm` : "N/A", detail: "Standing height." },
+                   ...(!hasVariants
+                     ? [{ label: "Availability", value: product.stock > 0 ? "In Stock" : "Out of Stock", detail: product.stock > 0 ? `${product.stock} available` : "Contact us" }]
+                     : []
+                   ),
+                 ].map((spec) => (
+                   <div key={spec.label} className="card-premium-dark p-10 space-y-6 group">
+                      <div className="space-y-1">
+                         <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-brand-gold opacity-60">{spec.label}</p>
+                         <p className="text-2xl font-serif text-brand-white group-hover:text-brand-gold transition-colors">{spec.value}</p>
+                      </div>
+                      <p className="text-[11px] text-brand-cream/30 uppercase tracking-[0.4em] font-bold">{spec.detail}</p>
+                   </div>
+                 ))}
+               </div>
+
+               {/* Variants table — only shown when product has variants */}
+               {hasVariants && (
+                 <div className="space-y-6">
+                   <div className="flex items-center gap-6">
+                     <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-brand-gold">Available Sizes &amp; Pricing</p>
+                     <div className="flex-1 h-px bg-brand-gold/20"></div>
+                   </div>
+
+                   {/* Table header */}
+                   <div className="grid grid-cols-4 gap-4 pb-3 border-b border-brand-gold/20">
+                     <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-brand-cream/30">Size / Variant</p>
+                     <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-brand-cream/30 text-right">Price</p>
+                     <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-brand-cream/30 text-right">Offer</p>
+                     <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-brand-cream/30 text-right">Stock</p>
+                   </div>
+
+                   {/* Variant rows */}
+                   {product.variants.map((v: SizeVariant) => {
+                     const effectivePrice = v.discountedPrice ?? v.price
+                     const hasDiscount = v.discountPercent > 0 && v.discountedPrice
+                     const isActiveVariant = selectedVariant?.id === v.id
+                     return (
+                       <div
+                         key={v.id}
+                         className={`grid grid-cols-4 gap-4 py-5 px-6 border transition-all duration-300 cursor-pointer ${
+                           isActiveVariant
+                             ? "border-brand-gold bg-brand-gold/10"
+                             : "border-brand-brass/10 hover:border-brand-gold/30 hover:bg-white/5"
+                         } ${v.stock === 0 ? "opacity-40" : ""}`}
+                         onClick={() => v.stock > 0 && handleVariantChange(v)}
+                       >
+                         <div className="flex items-center gap-3">
+                           {isActiveVariant && (
+                             <div className="w-1.5 h-1.5 rounded-full bg-brand-gold flex-shrink-0"></div>
+                           )}
+                           <span className={`font-serif text-lg ${
+                             isActiveVariant ? "text-brand-gold" : "text-brand-cream"
+                           }`}>
+                             {v.name}
+                           </span>
+                         </div>
+                         <div className="text-right">
+                           {hasDiscount ? (
+                             <span className="text-brand-cream/40 line-through text-sm font-sans">
+                               ₹{Number(v.price).toLocaleString("en-IN")}
+                             </span>
+                           ) : (
+                             <span className="font-bold text-brand-white text-base">
+                               ₹{Number(v.price).toLocaleString("en-IN")}
+                             </span>
+                           )}
+                         </div>
+                         <div className="text-right">
+                           {hasDiscount ? (
+                             <div className="space-y-0.5">
+                               <span className="block font-bold text-brand-gold text-base">
+                                 ₹{Number(effectivePrice).toLocaleString("en-IN")}
+                               </span>
+                               <span className="block text-[9px] text-red-400 font-bold uppercase tracking-wider">
+                                 -{v.discountPercent}% off
+                               </span>
+                             </div>
+                           ) : (
+                             <span className="text-brand-cream/20 text-sm">—</span>
+                           )}
+                         </div>
+                         <div className="text-right">
+                           {v.stock === 0 ? (
+                             <span className="text-[10px] uppercase tracking-wider font-bold text-red-400/70">Sold Out</span>
+                           ) : v.stock < 5 ? (
+                             <span className="text-[10px] uppercase tracking-wider font-bold text-brand-gold">{v.stock} left</span>
+                           ) : (
+                             <span className="text-[10px] uppercase tracking-wider font-bold text-brand-cream/50">{v.stock} in stock</span>
+                           )}
+                         </div>
+                       </div>
+                     )
+                   })}
                  </div>
-               ))}
+               )}
             </div>
          </div>
       </section>

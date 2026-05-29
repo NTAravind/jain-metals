@@ -1,28 +1,44 @@
 "use client"
 
-import { useState, useEffect, useRef, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Search, X, ArrowRight } from "lucide-react"
+import { useState, useEffect, useRef, useCallback, Suspense } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { Search, X, ArrowRight, Loader2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 function SearchBarContent() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
+
   const [isOpen, setIsOpen] = useState(false)
-  const [value, setValue] = useState(searchParams.get("q") ?? "")
+  // Local input value — separate from URL query so we can type without navigating
+  const [value, setValue] = useState("")
+  const [isNavigating, setIsNavigating] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  // Track pointer-down on submit to prevent onBlur closing before submit
-  const submitPending = useRef(false)
+  const prevPathname = useRef(pathname)
 
+  // Sync input value from URL only when on /products page
   useEffect(() => {
-    const q = searchParams.get("q") ?? ""
-    setValue(q)
-    if (q) setIsOpen(true)
-  }, [searchParams])
+    if (pathname === "/products" || pathname.startsWith("/products?")) {
+      const q = searchParams.get("q") ?? ""
+      setValue(q)
+    }
+  }, [searchParams, pathname])
 
+  // Auto-close search overlay after navigation completes (pathname changed)
+  useEffect(() => {
+    if (prevPathname.current !== pathname) {
+      prevPathname.current = pathname
+      setIsNavigating(false)
+      // Close after a short delay so the user sees the page start to load
+      const timer = setTimeout(() => setIsOpen(false), 200)
+      return () => clearTimeout(timer)
+    }
+  }, [pathname])
+
+  // Focus input when overlay opens
   useEffect(() => {
     if (isOpen) {
-      // Small timeout so mobile keyboard doesn't fight with animation
       setTimeout(() => inputRef.current?.focus(), 80)
     }
   }, [isOpen])
@@ -30,26 +46,40 @@ function SearchBarContent() {
   // Close on Escape
   useEffect(() => {
     if (!isOpen) return
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") close() }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close()
+    }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
   }, [isOpen])
 
-  const close = () => {
+  const close = useCallback(() => {
     setIsOpen(false)
-    submitPending.current = false
-  }
+    setIsNavigating(false)
+  }, [])
 
-  const submit = () => {
-    const params = new URLSearchParams(searchParams.toString())
+  const open = useCallback(() => {
+    // Pre-fill with current search query if on products page
+    if (pathname === "/products" || pathname.startsWith("/products?")) {
+      setValue(searchParams.get("q") ?? "")
+    }
+    setIsOpen(true)
+  }, [pathname, searchParams])
+
+  const submit = useCallback(() => {
     const trimmed = value.trim()
-    if (trimmed) params.set("q", trimmed)
-    else params.delete("q")
-    params.delete("page")
+    if (!trimmed) return
+
+    setIsNavigating(true)
+
+    // Build clean params — preserve category if on products page
+    const params = new URLSearchParams()
+    const category = searchParams.get("category")
+    if (category) params.set("category", category)
+    params.set("q", trimmed)
+
     router.push(`/products?${params.toString()}`)
-    // Don't close — keep search open so user sees they landed on results
-    submitPending.current = false
-  }
+  }, [value, searchParams, router])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,25 +88,31 @@ function SearchBarContent() {
 
   const handleClear = () => {
     setValue("")
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete("q")
-    params.delete("page")
-    router.push(`/products?${params.toString()}`)
+    inputRef.current?.focus()
+  }
+
+  const handleClearAndSearch = () => {
+    setValue("")
+    // Navigate to products without query
+    const params = new URLSearchParams()
+    const category = searchParams.get("category")
+    if (category) params.set("category", category)
+    router.push(`/products${params.toString() ? `?${params.toString()}` : ""}`)
     inputRef.current?.focus()
   }
 
   return (
     <>
-      {/* ── Trigger button (always visible) ────────────────────────────── */}
+      {/* ── Trigger button (always visible) ─────────────────────────────── */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={open}
         className="p-2 text-black/60 hover:text-black transition-colors flex items-center justify-center"
         aria-label="Open search"
       >
         <Search className="w-5 h-5" />
       </button>
 
-      {/* ── Search overlay (portal-style, covers full viewport) ─────────── */}
+      {/* ── Search overlay ──────────────────────────────────────────────── */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -91,7 +127,7 @@ function SearchBarContent() {
               onClick={close}
             />
 
-            {/* Search panel — slides down from top */}
+            {/* Search panel */}
             <motion.div
               key="search-panel"
               initial={{ opacity: 0, y: -16 }}
@@ -104,10 +140,14 @@ function SearchBarContent() {
                 onSubmit={handleSubmit}
                 className="max-w-[1440px] mx-auto flex items-center gap-4 px-5 md:px-12 h-20"
               >
-                {/* Icon */}
-                <Search className="w-5 h-5 text-black/30 shrink-0" />
+                {/* Icon / Loading state */}
+                {isNavigating ? (
+                  <Loader2 className="w-5 h-5 text-black/40 shrink-0 animate-spin" />
+                ) : (
+                  <Search className="w-5 h-5 text-black/30 shrink-0" />
+                )}
 
-                {/* Input — takes all available space */}
+                {/* Input */}
                 <input
                   ref={inputRef}
                   value={value}
@@ -118,13 +158,13 @@ function SearchBarContent() {
                   autoCorrect="off"
                   autoCapitalize="off"
                   spellCheck={false}
+                  disabled={isNavigating}
                 />
 
-                {/* Clear button — only when there's text */}
-                {value && (
+                {/* Clear button */}
+                {value && !isNavigating && (
                   <button
                     type="button"
-                    onPointerDown={() => { submitPending.current = true }}
                     onClick={handleClear}
                     className="shrink-0 p-2 text-black/30 hover:text-black transition-colors"
                     aria-label="Clear"
@@ -136,8 +176,8 @@ function SearchBarContent() {
                 {/* Search submit */}
                 <button
                   type="submit"
-                  onPointerDown={() => { submitPending.current = true }}
-                  className="shrink-0 flex items-center gap-2 h-11 px-5 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:opacity-80 transition-opacity"
+                  disabled={isNavigating || !value.trim()}
+                  className="shrink-0 flex items-center gap-2 h-11 px-5 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:opacity-80 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
                   aria-label="Search"
                 >
                   <span className="hidden sm:inline">Search</span>
@@ -155,14 +195,31 @@ function SearchBarContent() {
                 </button>
               </form>
 
-              {/* Optional: show current query as a hint */}
-              {searchParams.get("q") && (
-                <div className="max-w-[1440px] mx-auto px-5 md:px-12 pb-3">
-                  <p className="text-xs text-black/30 font-medium">
-                    Showing results for &quot;<span className="text-black/60">{searchParams.get("q")}</span>&quot;
+              {/* Status line */}
+              <div className="max-w-[1440px] mx-auto px-5 md:px-12 pb-3 flex items-center gap-3">
+                {isNavigating ? (
+                  <p className="text-xs text-black/40 font-medium animate-pulse">
+                    Searching for &quot;<span className="text-black/60">{value.trim()}</span>&quot;…
                   </p>
-                </div>
-              )}
+                ) : searchParams.get("q") && (pathname === "/products" || pathname.startsWith("/products?")) ? (
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs text-black/30 font-medium">
+                      Results for &quot;<span className="text-black/60">{searchParams.get("q")}</span>&quot;
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearAndSearch}
+                      className="text-xs text-black/40 hover:text-black underline underline-offset-2 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-black/20 font-medium">
+                    Press Enter or click Search — you can search from any page
+                  </p>
+                )}
+              </div>
             </motion.div>
           </>
         )}
