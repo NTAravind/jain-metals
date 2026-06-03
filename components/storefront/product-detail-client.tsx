@@ -111,7 +111,41 @@ export function ProductDetailClient({ product }: { product: any }) {
                      Image Unavailable
                    </div>
                )}
-               
+
+               {/* Watermark overlay */}
+               <div
+                 className="absolute inset-0 pointer-events-none select-none z-10 flex items-center justify-center"
+                 aria-hidden="true"
+               >
+                 <div
+                   className="absolute inset-0"
+                   style={{
+                     backgroundImage: `repeating-linear-gradient(
+                       -45deg,
+                       transparent,
+                       transparent 60px,
+                       rgba(255,255,255,0.04) 60px,
+                       rgba(255,255,255,0.04) 61px
+                     )`,
+                   }}
+                 />
+                 <span
+                   suppressHydrationWarning
+                   className="text-white font-bold uppercase select-none"
+                   style={{
+                     fontSize: "clamp(1.6rem, 5vw, 2.8rem)",
+                     opacity: 0.22,
+                     transform: "rotate(-35deg)",
+                     textShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                     letterSpacing: "0.4em",
+                     whiteSpace: "nowrap",
+                     mixBlendMode: "overlay",
+                   }}
+                 >
+                   JAIN METALS
+                 </span>
+               </div>
+
                 {!outOfStock && currentStock < 5 && (
                    <div className="absolute top-10 left-10 bg-brand-navy text-brand-gold border border-brand-gold/20 px-8 py-4 text-[10px] uppercase tracking-[0.4em] font-bold shadow-2xl">
                       Limited Stock
