@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update order in database
+  
     const updatedOrder = await prisma.order.update({
       where: { orderNumber },
       data: {
