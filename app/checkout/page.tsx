@@ -40,7 +40,7 @@ import {
 import { cn } from "@/lib/utils"
 
 const WHATSAPP_REDIRECT_ABOVE = 50000
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ""
+const WHATSAPP_NUMBER = process.env.WHATSAPPCONTACT ?? ""
 
 declare global {
   interface Window {

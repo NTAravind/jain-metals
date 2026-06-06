@@ -1,15 +1,14 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
-    const { id, phone } = await request.json()
-    console.log('Received request to complete order:', { id, phone })
+    const { orderNumber, phone } = await request.json()
+    console.log('Received request to complete order:', { orderNumber, phone })
 
-    if (!id) {
+    if (!orderNumber) {
       return NextResponse.json(
-        { error: 'Order ID is required' },
+        { error: 'Order number is required' },
         { status: 400 }
       )
     }
@@ -23,18 +22,17 @@ export async function POST(request: NextRequest) {
 
     // Update order in database
     const updatedOrder = await prisma.order.update({
-      where: { id },
+      where: { orderNumber },
       data: {
         status: "SHIPPED"
       }
     })
 
-    // Send WhatsApp notification - FIXED: using phone parameter instead of userId
+    // Send WhatsApp notification
     const whatsappResult = await SendWhatsappmsg(phone, updatedOrder.id)
 
     if (!whatsappResult.success) {
       console.error('WhatsApp notification failed:', whatsappResult.error)
-      // Still return success for order update, but include warning
       return NextResponse.json({
         ...updatedOrder,
         warning: 'Order completed but notification failed to send'
@@ -49,7 +47,6 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Error updating order:', error)
 
-    // Check if it's a Prisma error (order not found, etc.)
     if (error?.code === 'P2025') {
       return NextResponse.json(
         { error: 'Order not found' },
@@ -57,7 +54,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if it's a JSON parsing error
     if (error instanceof SyntaxError) {
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },
@@ -77,7 +73,6 @@ export async function POST(request: NextRequest) {
 
 async function SendWhatsappmsg(phone: string, orderid: string): Promise<{ success: boolean; error?: string; data?: any }> {
   try {
-    // Validate required environment variables
     if (!process.env.WHATSAPPPHONE) {
       throw new Error('WHATSAPPPHONE environment variable is not set')
     }
@@ -86,15 +81,12 @@ async function SendWhatsappmsg(phone: string, orderid: string): Promise<{ succes
       throw new Error('WHATSAPPENV environment variable is not set')
     }
 
-    // Validate and clean phone number
     if (!phone || phone.trim() === '') {
       throw new Error('Phone number is required')
     }
 
-    // Clean phone number - remove any non-digits
     const cleanPhone = phone.replace(/\D/g, '')
 
-    // Validate Indian phone number (should be 10 digits after cleaning)
     if (cleanPhone.length !== 10) {
       throw new Error(`Invalid phone number format: ${phone}. Expected 10 digits, got ${cleanPhone.length}`)
     }
@@ -111,7 +103,7 @@ async function SendWhatsappmsg(phone: string, orderid: string): Promise<{ succes
         },
         body: JSON.stringify({
           messaging_product: 'whatsapp',
-          to: `+91${cleanPhone}`, // Use cleaned phone number
+          to: `+91${cleanPhone}`,
           type: 'template',
           template: {
             name: 'tracking',
@@ -127,7 +119,6 @@ async function SendWhatsappmsg(phone: string, orderid: string): Promise<{ succes
       }
     )
 
-    // Check if the HTTP request was successful
     if (!whatsappResponse.ok) {
       const errorData = await whatsappResponse.text()
       console.error('WhatsApp API Error:', {
@@ -143,7 +134,6 @@ async function SendWhatsappmsg(phone: string, orderid: string): Promise<{ succes
       }
     }
 
-    // Parse and validate response
     const responseData = await whatsappResponse.json()
 
     if (responseData.error) {
@@ -155,7 +145,7 @@ async function SendWhatsappmsg(phone: string, orderid: string): Promise<{ succes
     }
 
     console.log('WhatsApp message sent successfully:', {
-      to: `+91${cleanPhone}`, // FIXED: Use actual recipient phone
+      to: `+91${cleanPhone}`,
       orderId: orderid,
       messageId: responseData.messages?.[0]?.id
     })

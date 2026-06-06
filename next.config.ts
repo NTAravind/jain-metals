@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  env: {
+    WHATSAPPCONTACT: process.env.WHATSAPPCONTACT,
+  },
   images: {
     remotePatterns: [
       // ── Garage S3 (local dev) ────────────────────────────────────────────

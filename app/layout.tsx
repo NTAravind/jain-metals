@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   title: "Jain Metals — Brass Idols, Copper Utensils & Home Decor",
   description:
     "Shop beautifully crafted brass idols, copper utensils, and home decor pieces. Trusted since 1964 for quality products and fair prices. Direct delivery across India.",
+ 
 }
 
 export const viewport: Viewport = {

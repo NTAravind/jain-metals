@@ -151,7 +151,7 @@ export default async function HomePage() {
             </div>
             <div className="pt-6">
               <Button asChild size="lg" className="bg-brand-navy text-white hover:bg-brand-surface transition-all duration-500 text-[10px] px-14 h-14 rounded-none uppercase tracking-[0.3em] font-bold shadow-2xl shadow-brand-navy/10 group">
-                <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919000000000"}`}
+                <a href={`https://wa.me/${process.env.WHATSAPPCONTACT || "919000000000"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4"
