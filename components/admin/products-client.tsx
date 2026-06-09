@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import { deleteProductAction } from "@/actions/products"
+import { useState, useCallback, useTransition } from "react"
+import { deleteProductAction, toggleProductActiveAction } from "@/actions/products"
 import { DataTable, type Column } from "@/components/admin/data-table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
@@ -20,6 +19,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 
 type Product = {
   id: string
@@ -78,6 +78,28 @@ export function ProductsClient({
     router.push(`/admin/products?${params.toString()}`)
   }, [router, searchParams])
 
+  const [, startToggle] = useTransition()
+  // Track per-row optimistic active state: productId → boolean
+  const [optimisticStates, setOptimisticStates] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(products.map((p) => [p.id, p.isActive]))
+  )
+
+  const handleToggleActive = (id: string, currentValue: boolean) => {
+    const next = !currentValue
+    setOptimisticStates((prev) => ({ ...prev, [id]: next }))
+    startToggle(async () => {
+      try {
+        await toggleProductActiveAction(id, next)
+        toast.success(next ? "Product set to Active" : "Product set to Inactive")
+        router.refresh()
+      } catch {
+        // Revert optimistic update on failure
+        setOptimisticStates((prev) => ({ ...prev, [id]: currentValue }))
+        toast.error("Failed to update status")
+      }
+    })
+  }
+
   const columns: Column<Product>[] = [
     { key: "name", header: "Name" },
     {
@@ -98,16 +120,29 @@ export function ProductsClient({
     {
       key: "isActive",
       header: "Status",
-      cell: (row) => (
-        <Badge 
-          variant={row.isActive ? "default" : "secondary"} 
-          className={row.isActive 
-            ? "bg-black text-white hover:opacity-90 rounded-full px-3 py-0.5" 
-            : "bg-black/5 text-black/50 hover:bg-black/10 rounded-full px-3 py-0.5"}
-        >
-          {row.isActive ? "Active" : "Inactive"}
-        </Badge>
-      ),
+      cell: (row) => {
+        const active = optimisticStates[row.id] ?? row.isActive
+        return (
+          <div
+            className="flex items-center gap-2.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Switch
+              id={`toggle-${row.id}`}
+              checked={active}
+              onCheckedChange={() => handleToggleActive(row.id, active)}
+              className="data-[state=checked]:bg-black"
+            />
+            <span
+              className={`text-xs font-bold uppercase tracking-widest ${
+                active ? "text-black" : "text-black/30"
+              }`}
+            >
+              {active ? "Active" : "Inactive"}
+            </span>
+          </div>
+        )
+      },
     },
     {
       key: "actions",

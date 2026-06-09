@@ -27,7 +27,7 @@ const ProductSchema = z.object({
   name: z.string().min(2),
   description: z.string().min(10),
   categoryId: z.string().optional(),
-  price: z.coerce.number().positive(),
+  price: z.coerce.number().min(0, "Price must be 0 or greater"),
   discountedPrice: optionalPositiveNumber,
   stock: z.coerce.number().int().min(0),
   weightKg: optionalPositiveNumber,
@@ -170,6 +170,14 @@ export async function deleteProductAction(id: string) {
   }
 
   await deleteProduct(id)
+  revalidatePath("/admin/products")
+  revalidatePath("/products")
+  return { success: true }
+}
+
+export async function toggleProductActiveAction(id: string, isActive: boolean) {
+  await requireAdmin()
+  await updateProduct(id, { isActive })
   revalidatePath("/admin/products")
   revalidatePath("/products")
   return { success: true }
