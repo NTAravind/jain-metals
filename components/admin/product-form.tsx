@@ -20,7 +20,6 @@ import { toast } from "sonner"
 import type { Product, Category } from "@/app/generated/prisma/client"
 import Image from "next/image"
 
-const STYLES = ["Traditional", "Modern", "Temple", "Decorative", "Miniature"]
 
 interface VariantRow {
   id?: string
@@ -247,8 +246,7 @@ export function ProductForm({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="space-y-2">
                   <Label htmlFor="categoryId" className="text-xs font-bold uppercase tracking-widest text-black/40 ml-1">Collection</Label>
                   <Select name="categoryId" defaultValue={product?.categoryId ?? "none"}>
                     <SelectTrigger className="rounded-xl h-12 border-black/10 bg-black/[0.02]">
@@ -262,21 +260,6 @@ export function ProductForm({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="style" className="text-xs font-bold uppercase tracking-widest text-black/40 ml-1">Artistic Style</Label>
-                  <Select name="style" defaultValue={product?.style ?? "none"}>
-                    <SelectTrigger className="rounded-xl h-12 border-black/10 bg-black/[0.02]">
-                      <SelectValue placeholder="Select Style" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-black/10">
-                      <SelectItem value="none">Custom / Unique</SelectItem>
-                      {STYLES.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
             </div>
           </div>
 

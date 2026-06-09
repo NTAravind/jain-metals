@@ -27,7 +27,6 @@ const ProductSchema = z.object({
   name: z.string().min(2),
   description: z.string().min(10),
   categoryId: z.string().optional(),
-  style: z.string().optional(),
   price: z.coerce.number().positive(),
   discountedPrice: optionalPositiveNumber,
   stock: z.coerce.number().int().min(0),
@@ -62,9 +61,8 @@ export async function createProductAction(formData: FormData) {
     }
   }
 
-  let { categoryId, style } = parsedData
+  let { categoryId } = parsedData
   if (!categoryId || categoryId === "none") categoryId = undefined
-  if (!style || style === "none") style = undefined
 
   const slug = slugify(parsedData.name, { lower: true, strict: true }) + "-" + nanoid(4)
   const sku = nanoid(8).toUpperCase()
@@ -74,7 +72,6 @@ export async function createProductAction(formData: FormData) {
     slug,
     sku,
     categoryId: categoryId || null,
-    style: style || null,
     discountedPrice: parsedData.discountedPrice || null,
     weightKg: parsedData.weightKg || null,
     heightCm: parsedData.heightCm || null,
@@ -111,9 +108,8 @@ export async function updateProductAction(id: string, formData: FormData) {
     }
   }
 
-  let { categoryId, style } = parsedData
+  let { categoryId } = parsedData
   if (!categoryId || categoryId === "none") categoryId = undefined
-  if (!style || style === "none") style = undefined
 
   // ── S3 cleanup: delete images removed in this edit ──────────────────────────
   const existing = await getProductByIdAdmin(id)
@@ -141,7 +137,6 @@ export async function updateProductAction(id: string, formData: FormData) {
     {
       ...parsedData,
       categoryId: categoryId || null,
-      style: style || null,
       discountedPrice: parsedData.discountedPrice || null,
       weightKg: parsedData.weightKg || null,
       heightCm: parsedData.heightCm || null,

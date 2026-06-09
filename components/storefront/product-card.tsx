@@ -21,7 +21,6 @@ type Product = {
   name: string
   slug: string
   category?: { name: string } | null
-  style: string | null
   price: number
   discountedPrice?: number | null
   stock: number

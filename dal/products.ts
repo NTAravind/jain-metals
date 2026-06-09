@@ -137,7 +137,6 @@ export async function createProduct(data: {
   sku: string
   description: string
   categoryId?: string | null
-  style?: string | null
   price: number
   discountedPrice?: number | null
   stock: number
@@ -185,7 +184,6 @@ export async function updateProduct(
     sku: string
     description: string
     categoryId: string | null
-    style: string | null
     price: number
     discountedPrice: number | null
     stock: number

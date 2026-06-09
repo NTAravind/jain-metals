@@ -25,7 +25,6 @@ type Product = {
   id: string
   name: string
   categoryName: string | null
-  style: string | null
   price: number
   stock: number
   isActive: boolean
@@ -86,7 +85,6 @@ export function ProductsClient({
       header: "Category",
       cell: (row) => row.categoryName ?? "—",
     },
-    { key: "style", header: "Style", cell: (row) => row.style ?? "—" },
     {
       key: "price",
       header: "Price",

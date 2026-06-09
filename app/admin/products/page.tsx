@@ -24,7 +24,6 @@ export default async function AdminProductsPage({
     id: p.id,
     name: p.name,
     categoryName: p.category?.name ?? null,
-    style: p.style,
     price: Number(p.price),
     stock: p.stock,
     isActive: p.isActive,

@@ -8,7 +8,7 @@
 !.yarn/releases
 !.yarn/versions
 .pnpm-store
-
+.
 # Testing
 /coverage
 

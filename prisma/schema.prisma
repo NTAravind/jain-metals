@@ -75,7 +75,6 @@ model Product {
   sku             String            @unique @default(cuid())
   description     String            @db.Text
   categoryId      String?
-  style           String?
   price           Decimal           @db.Decimal(10, 2)
   discountedPrice Decimal?          @db.Decimal(10, 2)
   stock           Int               @default(0)
