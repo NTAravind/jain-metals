@@ -310,6 +310,59 @@ export async function verifyPaymentAction(input: {
       return { success: true as const, orderId: order.id, alreadyVerified: true }
     }
 
+    // ── Fix #9: Server-side price recomputation ─────────────────────────────
+    // Re-fetch current DB prices for every item in the order. Compare the
+    // recomputed total against the stored order.total (which was itself set
+    // server-side at order creation). This catches any price-tampering that
+    // occurred between order creation and payment confirmation.
+    const orderWithItems = await prisma.order.findUnique({
+      where: { id: input.orderId },
+      include: {
+        items: {
+          include: {
+            product: true,
+            sizeVariant: true,
+          },
+        },
+      },
+    })
+    if (!orderWithItems) throw new Error("Order not found")
+
+    const serverSubtotal = orderWithItems.items.reduce(
+      (sum: number, item: any) => {
+        let unitPrice: number
+        if (item.sizeVariant) {
+          unitPrice = item.sizeVariant.discountedPrice
+            ? Number(item.sizeVariant.discountedPrice)
+            : Number(item.sizeVariant.price)
+        } else {
+          unitPrice = item.product.discountedPrice
+            ? Number(item.product.discountedPrice)
+            : Number(item.product.price)
+        }
+        return sum + unitPrice * item.quantity
+      },
+      0,
+    )
+
+    const serverTotal = Math.max(
+      0,
+      serverSubtotal +
+        Number(order.deliveryFee ?? 0) -
+        Number(order.discountAmount ?? 0),
+    )
+
+    if (Math.abs(serverTotal - Number(order.total)) > 0.01) {
+      console.error(
+        `[verifyPayment] Price mismatch for order ${order.id}: ` +
+          `server=${serverTotal} stored=${order.total}`,
+      )
+      throw new Error(
+        "Order amount mismatch — please contact support",
+      )
+    }
+    // ── End Fix #9 ──────────────────────────────────────────────────────────
+
     if (order.discountId) {
       const discount = await prisma.discount.findUnique({ where: { id: order.discountId } })
       if (!discount || !discount.isActive) throw new Error("Coupon is no longer valid")

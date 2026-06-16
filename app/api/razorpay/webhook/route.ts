@@ -54,18 +54,21 @@ export async function POST(req: NextRequest) {
   const eventType: string = event.event
   console.log(`[webhook] Event received: ${eventType}`)
 
-  try {
-    if (eventType === "payment.captured" || eventType === "order.paid") {
-      await handlePaymentCaptured(event)
-    } else if (eventType === "payment.failed") {
-      await handlePaymentFailed(event)
-    }
-    // All other events are acknowledged but ignored
-  } catch (err: any) {
-    console.error(`[webhook] Error handling ${eventType}:`, err.message)
-    // Return 200 anyway so Razorpay doesn't keep retrying on our DB errors
-    return NextResponse.json({ received: true, warning: err.message }, { status: 200 })
-  }
+  // Fix #3: Return 200 immediately so Razorpay never times out and retries
+  // due to slow DB writes. DB work runs in a detached promise with its own
+  // error handling — errors are logged but never bubble to Razorpay.
+  setImmediate(() => {
+    const task =
+      eventType === "payment.captured" || eventType === "order.paid"
+        ? handlePaymentCaptured(event)
+        : eventType === "payment.failed"
+          ? handlePaymentFailed(event)
+          : Promise.resolve()
+
+    task.catch((err: any) =>
+      console.error(`[webhook] Async error handling ${eventType}:`, err.message)
+    )
+  })
 
   return NextResponse.json({ received: true }, { status: 200 })
 }
@@ -82,14 +85,29 @@ async function handlePaymentCaptured(event: any) {
     return
   }
 
-  // Find our DB order by Razorpay order ID
-  const order = await prisma.order.findFirst({
-    where: { razorpayOrderId: rzpOrderId },
-    include: { items: true },
-  })
+  // Fix #4: Retry loop — the DB record may not exist yet if the client is
+  // still writing it concurrently (race between webhook & server action).
+  // Minimum 6 retries × 1500 ms = 9 s window before giving up.
+  const MAX_RETRIES = 6
+  const RETRY_DELAY_MS = 1500
+
+  let order: (Awaited<ReturnType<typeof prisma.order.findFirst>> & { items: any[] }) | null = null
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    order = await prisma.order.findFirst({
+      where: { razorpayOrderId: rzpOrderId },
+      include: { items: true },
+    })
+    if (order) break
+    if (attempt < MAX_RETRIES - 1) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS))
+    }
+  }
 
   if (!order) {
-    console.warn(`[webhook] No order found for razorpayOrderId=${rzpOrderId}`)
+    console.warn(
+      `[webhook] No order found for razorpayOrderId=${rzpOrderId} after ${MAX_RETRIES} retries`
+    )
     return
   }
 
