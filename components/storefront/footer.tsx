@@ -29,7 +29,7 @@ export function Footer() {
             <Link href={`https://wa.me/${process.env.WHATSAPPCONTACT}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
               <WhatsappLogo className="w-4 h-4 text-brand-gold group-hover:text-brand-navy transition-colors" />
             </Link>
-            <Link href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
+            <Link href="https://maps.app.goo.gl/uJ6qTbQqLCyNBQm8A" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
               <MapsLogo className="w-4 h-4 text-brand-gold group-hover:text-brand-navy transition-colors" />
             </Link>
           </div>
@@ -64,9 +64,7 @@ export function Footer() {
             <div className="flex items-start gap-4">
               <MapPin className="w-5 h-5 text-white/40 shrink-0 mt-1" />
               <address className="not-italic text-[11px] font-bold uppercase tracking-widest text-white/60 leading-relaxed font-sans">
-                Jain Metals HQ,<br />
-                Jaipur, RJ,<br />
-                Indian Union
+              Gokula 1st Stage, Mathikere,<br />  Bengaluru, Karnataka 560054
               </address>
             </div>
             <div className="flex items-center gap-4">
@@ -75,7 +73,7 @@ export function Footer() {
             </div>
             <div className="flex items-center gap-4">
               <Mail className="w-5 h-5 text-white/40 shrink-0" />
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 font-sans">contact@jainmetals.com</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 font-sans">jainmetals@gmail.com</p>
             </div>
           </div>
         </div>

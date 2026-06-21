@@ -5,7 +5,7 @@ export function FloatingContact() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
       <Link
-        href="https://maps.google.com"
+        href="https://maps.app.goo.gl/uJ6qTbQqLCyNBQm8A"
         target="_blank"
         rel="noopener noreferrer"
         className="w-14 h-14 bg-white border border-brand-gold/30 rounded-full flex items-center justify-center shadow-2xl hover:bg-brand-gold transition-all group hover:-translate-y-1"
