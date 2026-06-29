@@ -510,10 +510,11 @@ export function ProductForm({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="heightCm" className="text-[10px] font-bold uppercase tracking-widest text-black/40 ml-1">Height (CM)</Label>
+                <Label htmlFor="dimensions" className="text-[10px] font-bold uppercase tracking-widest text-black/40 ml-1">Dimensions (inches)</Label>
                 <Input 
-                  id="heightCm" name="heightCm" type="number" step="0.01" min="0" 
-                  defaultValue={product?.heightCm?.toString() ?? ""} 
+                  id="dimensions" name="dimensions" type="text"
+                  placeholder='e.g. 2.5"×3"×6.5"'
+                  defaultValue={product?.dimensions?.toString() ?? ""} 
                   className="rounded-xl h-11 border-black/10 bg-black/[0.02]"
                 />
               </div>

@@ -129,7 +129,7 @@ function DiscountForm({
               type="number"
               step="0.01"
               defaultValue={discount ? Number(discount.value) : ""}
-              required
+              required={type !== "FREE_DELIVERY"}
               placeholder="0"
               className="h-11 rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all text-base pr-12"
             />

@@ -310,8 +310,14 @@ export function ProductDetailClient({ product }: { product: any }) {
                   <p className="text-brand-cream/50 text-sm">
                     Contact us to place a special order
                   </p>
-                  <Button variant="outline" className="w-full border-brand-gold/30 text-brand-gold hover:bg-brand-gold/10 rounded-none uppercase tracking-widest text-xs h-12">
-                    Contact Us
+                  <Button asChild variant="outline" className="w-full border-brand-gold/30 text-brand-gold hover:bg-brand-gold/10 rounded-none uppercase tracking-widest text-xs h-12">
+                    <a
+                      href={`https://wa.me/${process.env.WHATSAPPCONTACT || "919000000000"}?text=${encodeURIComponent(`Hello, I'm interested in placing a special order for "${product.name}".`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Contact Us
+                    </a>
                   </Button>
                 </div>
               )}
@@ -321,8 +327,8 @@ export function ProductDetailClient({ product }: { product: any }) {
                 <div className="flex items-center gap-3">
                   <Ruler className="w-4 h-4 text-brand-gold/50" />
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brand-navy/30">Height</p>
-                    <p className="font-bold text-brand-navy">{product.heightCm ? `${product.heightCm} cm` : "—"}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brand-navy/30">Dimensions</p>
+                    <p className="font-bold text-brand-navy">{product.dimensions ? `${product.dimensions} in` : "—"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -347,9 +353,14 @@ export function ProductDetailClient({ product }: { product: any }) {
                 <button onClick={handleShare} className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-brand-navy/40 hover:text-brand-gold transition-colors">
                   <Share2 className="w-4 h-4" /> Share
                 </button>
-                <button className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-brand-navy/40 hover:text-brand-gold transition-colors">
+                <a
+                  href={`https://wa.me/${process.env.WHATSAPPCONTACT || "919000000000"}?text=${encodeURIComponent(`Hello, I need help regarding the product: "${product.name}" (ID: ${product.id}).`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-brand-navy/40 hover:text-brand-gold transition-colors"
+                >
                   <MessageSquare className="w-4 h-4" /> Help
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -374,7 +385,7 @@ export function ProductDetailClient({ product }: { product: any }) {
                  {[
                    { label: "Material", value: product.material || "Brass", detail: "Quality crafted." },
                    { label: "Weight", value: product.weightKg ? `${product.weightKg} kg` : "N/A", detail: "As listed." },
-                   { label: "Height", value: product.heightCm ? `${product.heightCm} cm` : "N/A", detail: "Standing height." },
+                   { label: "Dimensions", value: product.dimensions ? `${product.dimensions} in` : "N/A", detail: "W × D × H in inches." },
                    ...(!hasVariants
                      ? [{ label: "Availability", value: product.stock > 0 ? "In Stock" : "Out of Stock", detail: product.stock > 0 ? `${product.stock} available` : "Contact us" }]
                      : []

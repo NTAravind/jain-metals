@@ -14,6 +14,7 @@ type Order = {
   paymentStatus: string
   total: any
   createdAt: Date
+  items: { product: { images: string[] } }[]
 }
 
 const statusColorMap: Record<string, string> = {
@@ -70,6 +71,31 @@ export function OrdersTable({
       cell: (row) => (
         <span className="font-mono text-xs">#{row.orderNumber.slice(-8)}</span>
       ),
+    },
+    {
+      key: "items",
+      header: "Items",
+      cell: (row) => {
+        const firstItem = row.items?.[0]
+        const image = firstItem?.product?.images?.[0]
+        const count = row.items?.length ?? 0
+        return (
+          <div className="flex items-center gap-3">
+            <div className="relative w-9 h-9 rounded-md overflow-hidden bg-black/5 flex-shrink-0">
+              {image ? (
+                <img src={image} alt="Product" className="object-cover w-full h-full" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-black/40 text-[10px] uppercase font-bold">Img</div>
+              )}
+            </div>
+            {count > 1 && (
+              <span className="text-[10px] font-bold text-black/40 uppercase tracking-widest whitespace-nowrap">
+                +{count - 1} more
+              </span>
+            )}
+          </div>
+        )
+      }
     },
     {
       key: "phone",

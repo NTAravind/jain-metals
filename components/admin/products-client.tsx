@@ -28,6 +28,7 @@ type Product = {
   price: number
   stock: number
   isActive: boolean
+  image: string | null
 }
 
 type Category = {
@@ -101,6 +102,19 @@ export function ProductsClient({
   }
 
   const columns: Column<Product>[] = [
+    {
+      key: "image",
+      header: "Image",
+      cell: (row) => (
+        <div className="relative w-10 h-10 rounded-md overflow-hidden bg-black/5 flex-shrink-0">
+          {row.image ? (
+            <img src={row.image} alt={row.name} className="object-cover w-full h-full" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-black/40 text-[10px] uppercase font-bold">No Img</div>
+          )}
+        </div>
+      ),
+    },
     { key: "name", header: "Name" },
     {
       key: "categoryName",

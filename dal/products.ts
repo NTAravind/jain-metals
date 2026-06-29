@@ -141,7 +141,7 @@ export async function createProduct(data: {
   discountedPrice?: number | null
   stock: number
   weightKg?: number | null
-  heightCm?: number | null
+  dimensions?: string | null
   images: string[]
   videoUrl?: string | null
   isActive: boolean
@@ -188,7 +188,7 @@ export async function updateProduct(
     discountedPrice: number | null
     stock: number
     weightKg: number | null
-    heightCm: number | null
+    dimensions: string | null
     images: string[]
     videoUrl: string | null
     isActive: boolean

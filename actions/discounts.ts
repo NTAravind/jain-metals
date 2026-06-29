@@ -15,7 +15,7 @@ const DiscountSchema = z.object({
     .transform((v) => v.toUpperCase())
     .optional(),
   type: z.enum(["PERCENTAGE", "FIXED", "FREE_DELIVERY"]),
-  value: z.coerce.number().positive(),
+  value: z.coerce.number().min(0),
   minOrderValue: z.coerce.number().optional(),
   maxUses: z.coerce.number().int().optional(),
   freeDelivery: z.coerce.boolean().optional(),

@@ -19,6 +19,12 @@ export default async function AdminOrdersPage({
     deliveryFee: Number(order.deliveryFee),
     discountAmount: Number(order.discountAmount),
     total: Number(order.total),
+    items: order.items.map(item => ({
+      ...item,
+      product: {
+        images: item.product.images
+      }
+    }))
   }))
 
   return (

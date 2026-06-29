@@ -79,7 +79,7 @@ model Product {
   discountedPrice Decimal?          @db.Decimal(10, 2)
   stock           Int               @default(0)
   weightKg        Float?
-  heightCm        Float?
+  dimensions      String?
   images          String[]
   videoUrl        String?
   isActive        Boolean           @default(true)

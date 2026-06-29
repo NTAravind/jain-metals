@@ -26,7 +26,7 @@ export function Footer() {
             <Link href="mailto:contact@jainmetals.com" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
               <Mail className="w-4 h-4 text-brand-gold group-hover:text-brand-navy transition-colors" />
             </Link>
-            <Link href={`https://wa.me/${process.env.WHATSAPPCONTACT}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
+            <Link href={`https://wa.me/${process.env.WHATSAPPCONTACT || "919000000000"}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
               <WhatsappLogo className="w-4 h-4 text-brand-gold group-hover:text-brand-navy transition-colors" />
             </Link>
             <Link href="https://maps.app.goo.gl/uJ6qTbQqLCyNBQm8A" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-brand-gold/30 flex items-center justify-center hover:bg-brand-gold transition-all rounded-none group bg-brand-navy">
@@ -67,10 +67,19 @@ export function Footer() {
               Gokula 1st Stage, Mathikere,<br />  Bengaluru, Karnataka 560054
               </address>
             </div>
-            <div className="flex items-center gap-4">
+            <a
+              href={`https://wa.me/${process.env.WHATSAPPCONTACT || "919000000000"}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 hover:text-brand-gold transition-colors"
+            >
               <Phone className="w-5 h-5 text-white/40 shrink-0" />
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 font-sans">+91 98765 43210</p>
-            </div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 font-sans">
+                {process.env.WHATSAPPCONTACT 
+                  ? `+${process.env.WHATSAPPCONTACT.slice(0, 2)} ${process.env.WHATSAPPCONTACT.slice(2, 7)} ${process.env.WHATSAPPCONTACT.slice(7)}`
+                  : "+91 98765 43210"}
+              </p>
+            </a>
             <div className="flex items-center gap-4">
               <Mail className="w-5 h-5 text-white/40 shrink-0" />
               <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 font-sans">jainmetals@gmail.com</p>
