@@ -82,7 +82,7 @@ export function Footer() {
             </a>
             <div className="flex items-center gap-4">
               <Mail className="w-5 h-5 text-white/40 shrink-0" />
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 font-sans">jainmetals@gmail.com</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 font-sans">jainmetalsstore@gmail.com</p>
             </div>
           </div>
         </div>
