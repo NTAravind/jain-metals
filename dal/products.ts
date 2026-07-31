@@ -19,11 +19,35 @@ function serializeProduct(product: any) {
   };
 }
 
+import { unstable_cache } from "next/cache"
+
+const getBestsellersCached = unstable_cache(
+  async (where: any, page: number, pageSize: number) => {
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          category: true,
+          variants: { orderBy: { sortOrder: "asc" } },
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { orderItems: { _count: "desc" } },
+      }),
+      prisma.product.count({ where }),
+    ])
+    return { products: products.map(serializeProduct), total, pages: Math.ceil(total / pageSize) }
+  },
+  ["bestsellers-sort"],
+  { revalidate: 86400 }
+)
+
 export const getProducts = cache(async (
   page = 1,
   pageSize = 12,
   categorySlug?: string,
-  q?: string
+  q?: string,
+  sort?: string
 ) => {
   const searchTerm = q?.trim().toLowerCase()
   const where: any = {
@@ -40,6 +64,15 @@ export const getProducts = cache(async (
       : {}),
   }
 
+  if (sort === "bestseller") {
+    return getBestsellersCached(where, page, pageSize)
+  }
+
+  let orderBy: any = { createdAt: "desc" }
+  if (sort === "price_desc") orderBy = { price: "desc" }
+  else if (sort === "price_asc") orderBy = { price: "asc" }
+  else if (sort === "date_asc") orderBy = { createdAt: "asc" }
+
   const [products, total] = await Promise.all([
     prisma.product.findMany({
       where,
@@ -49,7 +82,7 @@ export const getProducts = cache(async (
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: { createdAt: "desc" },
+      orderBy,
     }),
     prisma.product.count({ where }),
   ])

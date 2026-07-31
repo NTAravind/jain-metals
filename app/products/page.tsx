@@ -3,6 +3,7 @@ import { getAllCategories } from "@/dal/categories"
 import { ProductCard } from "@/components/storefront/product-card"
 import { Pagination } from "@/components/storefront/pagination"
 import { CategoryFilter } from "@/components/storefront/category-filter"
+import { SortSelect } from "@/components/storefront/sort-select"
 import { Suspense } from "react"
 
 export const revalidate = 60
@@ -10,14 +11,14 @@ export const revalidate = 60
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; category?: string; q?: string }>
+  searchParams: Promise<{ page?: string; category?: string; q?: string; sort?: string }>
 }) {
-  const { page: pageParam, category: categorySlug, q } = await searchParams
+  const { page: pageParam, category: categorySlug, q, sort } = await searchParams
 
   const page = Math.max(1, Number(pageParam ?? 1))
 
   const [{ products, pages }, categories] = await Promise.all([
-    getProducts(page, 12, categorySlug, q),
+    getProducts(page, 12, categorySlug, q, sort),
     getAllCategories(),
   ])
 
@@ -60,7 +61,7 @@ export default async function ProductsPage({
               <CategoryFilter categories={categories as any} activeSlug={categorySlug} />
 
               {/* B2B Trust Badge in Sidebar */}
-              <div className="p-8 bg-brand-navy text-brand-cream border border-brand-gold/20 space-y-4">
+              <div className="hidden lg:block p-8 bg-brand-navy text-brand-cream border border-brand-gold/20 space-y-4">
                 <p className="text-xs uppercase tracking-[0.3em] font-bold text-brand-gold">Why Shop With Us</p>
                 <p className="text-sm leading-relaxed font-sans opacity-60">
                   Quality products, fair prices, and reliable delivery. We're here to help you find exactly what you need.
@@ -81,8 +82,8 @@ export default async function ProductsPage({
             ) : (
               <div className="space-y-24">
                 {/* Refined Status Bar */}
-                <div className="flex items-center justify-between border-b border-brand-navy pb-10">
-                  <div className="flex items-center gap-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brand-navy pb-10 gap-6">
+                  <div className="flex flex-wrap items-center gap-6">
                     <p className="text-xs uppercase tracking-[0.2em] font-bold text-brand-navy">
                       Products
                     </p>
@@ -90,11 +91,14 @@ export default async function ProductsPage({
                       {products.length}
                     </span>
                   </div>
-                  {q && (
-                    <div className="flex items-center gap-3 px-6 py-2 bg-brand-gold/10 border border-brand-gold/20 rounded-sm">
-                      <span className="text-xs uppercase tracking-[0.2em] font-bold text-brand-gold">Search: "{q}"</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-4">
+                    {q && (
+                      <div className="flex items-center gap-3 px-6 py-2 bg-brand-gold/10 border border-brand-gold/20 rounded-sm">
+                        <span className="text-xs uppercase tracking-[0.2em] font-bold text-brand-gold">Search: "{q}"</span>
+                      </div>
+                    )}
+                    <SortSelect />
+                  </div>
                 </div>
 
                 {/* Grid with Premium Cards */}

@@ -288,7 +288,7 @@ export async function calculateDeliveryFee(
       return Math.ceil(p.basePrice + totalWeightKg * p.pricePerKg)
     }
   }
-  return 0
+  return orderValue >= 2000 ? 0 : 100
 }
 
 export async function calculateDeliveryFeeByState(
@@ -296,10 +296,10 @@ export async function calculateDeliveryFeeByState(
   totalWeightKg: number,
   orderValue: number,
 ): Promise<number> {
-  if (!state) return 0
+  if (!state) return orderValue >= 2000 ? 0 : 100
 
   const stateResult = await getStateDeliveryByState(state)
-  if (!stateResult || !stateResult.isActive) return 0
+  if (!stateResult || !stateResult.isActive) return orderValue >= 2000 ? 0 : 100
 
   if (stateResult.freeAboveValue && orderValue >= stateResult.freeAboveValue) return 0
   return Math.ceil(stateResult.basePrice + totalWeightKg * stateResult.pricePerKg)
@@ -411,8 +411,8 @@ export async function resolveDeliveryQuote({
   }
 
   return {
-    fee: 0,
-    serviceable: false,
+    fee: orderValue >= 2000 ? 0 : 100,
+    serviceable: true,
     state: normalizedState || undefined,
     country: "India",
   }

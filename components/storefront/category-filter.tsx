@@ -49,7 +49,7 @@ function CategoryFilterContent({ categories, activeSlug }: CategoryFilterProps) 
                   "group flex items-center justify-between text-left py-3.5 transition-all duration-500",
                   !activeSlug
                     ? "text-brand-gold"
-                    : "text-brand-cream/80 hover:text-brand-white"
+                    : "text-brand-gold/60 hover:text-brand-gold"
                 )}
               >
                 <span className="text-xs font-bold uppercase tracking-[0.2em]">All Masterpieces</span>
@@ -64,7 +64,7 @@ function CategoryFilterContent({ categories, activeSlug }: CategoryFilterProps) 
                     "group flex items-center justify-between text-left py-3.5 transition-all duration-500 border-t border-brand-gold/10",
                     activeSlug === cat.slug
                       ? "text-brand-gold"
-                      : "text-brand-cream/80 hover:text-brand-white"
+                      : "text-brand-gold/60 hover:text-brand-gold"
                   )}
                 >
                   <span className="text-xs font-bold uppercase tracking-[0.2em]">{cat.name}</span>
@@ -93,8 +93,8 @@ function CategoryFilterContent({ categories, activeSlug }: CategoryFilterProps) 
           className={cn(
             "shrink-0 px-6 py-3 text-[9px] font-bold uppercase tracking-widest transition-all border",
             !activeSlug
-              ? "bg-brand-navy border-brand-navy text-brand-gold shadow-lg blue-texture relative overflow-hidden"
-              : "bg-white border-brand-brass/10 text-brand-navy/40"
+              ? "bg-brand-navy border-brand-gold text-brand-gold shadow-[0_0_10px_rgba(201,168,76,0.3)] blue-texture relative overflow-hidden"
+              : "bg-brand-navy/90 border-brand-gold/30 text-brand-gold/70 hover:border-brand-gold/50 hover:text-brand-gold"
           )}
         >
           <div className="relative z-10">All Gallery</div>
@@ -106,8 +106,8 @@ function CategoryFilterContent({ categories, activeSlug }: CategoryFilterProps) 
             className={cn(
               "shrink-0 px-6 py-3 text-[9px] font-bold uppercase tracking-widest transition-all border",
               activeSlug === cat.slug
-                ? "bg-brand-navy border-brand-navy text-brand-gold shadow-lg"
-                : "bg-white border-brand-brass/10 text-brand-navy/40"
+                ? "bg-brand-navy border-brand-gold text-brand-gold shadow-[0_0_10px_rgba(201,168,76,0.3)] blue-texture relative overflow-hidden"
+                : "bg-brand-navy/90 border-brand-gold/30 text-brand-gold/70 hover:border-brand-gold/50 hover:text-brand-gold"
             )}
           >
             {cat.name}
