@@ -13,7 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import Image from "next/image"
+import { ArrowLeft, Package } from "lucide-react"
 
 export default async function AdminOrderDetailPage({
   params,
@@ -100,8 +101,47 @@ export default async function AdminOrderDetailPage({
             <TableBody>
               {order.items.map((item: (typeof order.items)[number]) => (
                 <TableRow key={item.id} className="border-black/5">
-                  <TableCell className="font-medium text-black">
-                    {item.product?.name ?? "—"}
+                  <TableCell>
+                    <div className="flex items-start gap-3">
+                      {item.product?.images?.[0] ? (
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                          <Image 
+                            src={item.product.images[0]} 
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                          <Package className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="font-medium text-black">
+                          {item.product?.name ?? "—"}
+                        </span>
+                        <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                          {item.product?.sku && (
+                            <p>SKU: <span className="font-medium">{item.product.sku}</span></p>
+                          )}
+                          {item.product?.category?.name && (
+                            <p>Category: <span className="font-medium">{item.product.category.name}</span></p>
+                          )}
+                          {item.sizeName && (
+                            <p>Size: <span className="font-medium">{item.sizeName}</span></p>
+                          )}
+                          {(item.product?.weightKg || item.product?.dimensions) && (
+                            <p className="text-gray-400">
+                              {[
+                                item.product?.weightKg ? `${item.product.weightKg} kg` : null,
+                                item.product?.dimensions
+                              ].filter(Boolean).join(" • ")}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right text-gray-600">{item.quantity}</TableCell>
                   <TableCell className="text-right text-gray-600">

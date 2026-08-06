@@ -7,7 +7,18 @@ const ORDER_INCLUDE = {
   discount: true,
   items: {
     include: {
-      product: { select: { id: true, name: true, slug: true, images: true } },
+      product: { 
+        select: { 
+          id: true, 
+          name: true, 
+          slug: true, 
+          images: true,
+          sku: true,
+          weightKg: true,
+          dimensions: true,
+          category: { select: { name: true } }
+        } 
+      },
     },
   },
 } as const
