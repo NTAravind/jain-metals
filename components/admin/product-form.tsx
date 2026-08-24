@@ -203,7 +203,7 @@ export function ProductForm({
         router.push("/admin/products")
         router.refresh()
       } else {
-        toast.error("Failed to save product")
+        toast.error(res?.error ?? "Failed to save product")
       }
     })
   }
@@ -241,8 +241,9 @@ export function ProductForm({
                   defaultValue={product?.description}
                   rows={6}
                   required
+                  minLength={10}
                   className="rounded-xl border-black/10 bg-black/[0.02] focus:ring-black transition-all resize-none text-base leading-relaxed"
-                  placeholder="Describe the craftsmanship, materials, and significance..."
+                  placeholder="Describe the craftsmanship, materials, and significance (at least 10 characters)..."
                 />
               </div>
 

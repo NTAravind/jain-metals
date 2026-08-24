@@ -25,7 +25,7 @@ const optionalPositiveNumber = z.preprocess(
 
 const ProductSchema = z.object({
   name: z.string().min(2),
-  description: z.string().min(10),
+  description: z.string().trim().min(10, "Description must be at least 10 characters"),
   categoryId: z.string().optional(),
   price: z.coerce.number().min(0, "Price must be 0 or greater"),
   discountedPrice: optionalPositiveNumber,
@@ -43,11 +43,18 @@ export async function createProductAction(formData: FormData) {
   const images = formData.getAll("images").map((v) => v.toString()).filter(Boolean)
 
   const rawData = Object.fromEntries(formData.entries())
-  const parsedData = ProductSchema.parse({
+  const parsedResult = ProductSchema.safeParse({
     ...rawData,
     images,
     isActive: formData.get("isActive") === "true",
   })
+  if (!parsedResult.success) {
+    return {
+      success: false,
+      error: parsedResult.error.issues[0]?.message ?? "Please check the product details",
+    }
+  }
+  const parsedData = parsedResult.data
 
   // Parse variants from JSON string
   const variantsRaw = formData.get("variants")?.toString()
@@ -90,11 +97,18 @@ export async function updateProductAction(id: string, formData: FormData) {
   const images = formData.getAll("images").map((v) => v.toString()).filter(Boolean)
 
   const rawData = Object.fromEntries(formData.entries())
-  const parsedData = ProductSchema.parse({
+  const parsedResult = ProductSchema.safeParse({
     ...rawData,
     images,
     isActive: formData.get("isActive") === "true",
   })
+  if (!parsedResult.success) {
+    return {
+      success: false,
+      error: parsedResult.error.issues[0]?.message ?? "Please check the product details",
+    }
+  }
+  const parsedData = parsedResult.data
 
   // Parse variants from JSON string
   const variantsRaw = formData.get("variants")?.toString()
