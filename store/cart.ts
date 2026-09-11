@@ -29,12 +29,43 @@ interface CartStore {
   removeItem: (productId: string, sizeVariantId?: string | null) => void
   updateQuantity: (productId: string, quantity: number, sizeVariantId?: string | null) => void
   clearCart: () => void
+  refreshPrices: (updates: { productId: string; sizeVariantId: string | null; price: number; discountedPrice: number | null; stock: number }[]) => boolean
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [],
+      refreshPrices: (updates) => {
+        let hasChanges = false
+        set((state) => {
+          const newItems = state.items.map(item => {
+            const match = updates.find(u => u.productId === item.productId && u.sizeVariantId === (item.sizeVariantId ?? null))
+            if (match) {
+              if (
+                item.product.price !== match.price ||
+                item.product.discountedPrice !== match.discountedPrice ||
+                item.product.stock !== match.stock
+              ) {
+                hasChanges = true
+                return {
+                  ...item,
+                  product: {
+                    ...item.product,
+                    price: match.price,
+                    discountedPrice: match.discountedPrice,
+                    stock: match.stock,
+                  },
+                  quantity: Math.min(item.quantity, match.stock)
+                }
+              }
+            }
+            return item
+          })
+          return { items: newItems }
+        })
+        return hasChanges
+      },
       addItem: (newItem) =>
         set((state) => {
           const key = itemKey(newItem)

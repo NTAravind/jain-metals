@@ -22,6 +22,7 @@ import {
   TicketPercent,
   PercentCircle,
   Layers,
+  Server,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -36,6 +37,7 @@ const navItems = [
   { label: "Coupons", href: "/admin/coupons", icon: TicketPercent },
   { label: "Delivery", href: "/admin/delivery", icon: Truck },
   { label: "Customers", href: "/admin/customers", icon: Users },
+  { label: "Server", href: "/admin/server", icon: Server },
 ]
 
 export function AppSidebar() {

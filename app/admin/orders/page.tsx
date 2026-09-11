@@ -14,17 +14,20 @@ export default async function AdminOrdersPage({
   const { orders, pages, total } = await getOrdersPaginated(page, 10, search, status)
 
   const serializedOrders = orders.map((order) => ({
-    ...order,
-    subtotal: Number(order.subtotal),
-    deliveryFee: Number(order.deliveryFee),
-    discountAmount: Number(order.discountAmount),
+    id: order.id,
+    orderNumber: order.orderNumber,
+    user: order.user,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
     total: Number(order.total),
-    items: order.items.map(item => ({
-      ...item,
+    createdAt: order.createdAt,
+    // OrdersTable only needs product images. Do not pass Prisma Decimal fields
+    // (such as item.unitPrice or discount.value) into this Client Component.
+    items: order.items.map((item) => ({
       product: {
-        images: item.product.images
-      }
-    }))
+        images: item.product.images,
+      },
+    })),
   }))
 
   return (

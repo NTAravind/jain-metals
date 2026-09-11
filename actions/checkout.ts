@@ -46,6 +46,54 @@ const CheckoutSchema = z.object({
   }).optional(),
 })
 
+// ── Refresh cart prices ───────────────────────────────────────────────────────
+
+export async function refreshCartPricesAction(
+  items: { productId: string; sizeVariantId?: string | null }[]
+) {
+  if (!items.length) return []
+  
+  const products = await prisma.product.findMany({
+    where: { id: { in: items.map(i => i.productId) } },
+    include: { variants: true },
+  })
+
+  return items.map(item => {
+    const product = products.find(p => p.id === item.productId)
+    if (!product) return null
+
+    let price: number
+    let discountedPrice: number | null = null
+    let stock: number
+
+    if (item.sizeVariantId) {
+      const variant = product.variants.find(v => v.id === item.sizeVariantId)
+      if (!variant) return null
+      price = Number(variant.price)
+      discountedPrice = variant.discountedPrice ? Number(variant.discountedPrice) : null
+      stock = variant.stock
+    } else {
+      price = Number(product.price)
+      discountedPrice = product.discountedPrice ? Number(product.discountedPrice) : null
+      stock = product.stock
+    }
+
+    return {
+      productId: item.productId,
+      sizeVariantId: item.sizeVariantId ?? null,
+      price,
+      discountedPrice,
+      stock,
+    }
+  }).filter(Boolean) as {
+    productId: string
+    sizeVariantId: string | null
+    price: number
+    discountedPrice: number | null
+    stock: number
+  }[]
+}
+
 // ── Create delivery address ───────────────────────────────────────────────────
 
 export async function createAddressAction(formData: FormData) {

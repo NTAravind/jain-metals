@@ -61,7 +61,8 @@ export function ProductDetailClient({ product }: { product: any }) {
         id: product.id,
         name: product.name,
         slug: product.slug,
-        price: Number(activePrice),
+        // price = original MRP; discountedPrice = sale price (null if no discount)
+        price: Number(originalPrice ?? activePrice),
         discountedPrice: originalPrice ? Number(activePrice) : null,
         stock: currentStock,
         images: product.images,

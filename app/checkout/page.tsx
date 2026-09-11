@@ -10,6 +10,7 @@ import {
   createAddressAction,
   getDeliveryFeeAction,
   getDefaultAddressAction,
+  refreshCartPricesAction,
 } from "@/actions/checkout"
 import { validateCouponAction } from "@/actions/coupons"
 import { Button } from "@/components/ui/button"
@@ -66,7 +67,29 @@ export default function CheckoutPage() {
   const { data: session } = useSession()
   const items = useCartStore((s) => s.items)
   const clearCart = useCartStore((s) => s.clearCart)
+  const refreshPrices = useCartStore((s) => s.refreshPrices)
   const router = useRouter()
+
+  // Refresh cart prices on mount to handle stale localStorage prices
+  useEffect(() => {
+    async function syncPrices() {
+      if (!items.length) return
+      try {
+        const updates = await refreshCartPricesAction(
+          items.map(i => ({ productId: i.productId, sizeVariantId: i.sizeVariantId }))
+        )
+        const hasChanges = refreshPrices(updates)
+        if (hasChanges) {
+          toast.warning("Some prices or stock levels were updated since you added them to your cart. Please review before checkout.", {
+            duration: 8000
+          })
+        }
+      } catch (err) {
+        console.error("Failed to refresh cart prices:", err)
+      }
+    }
+    syncPrices()
+  }, []) // Empty deps so it runs only on mount
 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
